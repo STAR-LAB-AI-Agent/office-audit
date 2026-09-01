@@ -1,0 +1,41 @@
+# Python environments and caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local outputs and temporary files
+outputs/
+reports/
+logs/
+tmp/
+*.tmp
+*.bak
+
+# Downloaded or locally generated datasets; keep manifests and test definitions
+data/raw/
+data/external/
+data/downloads/
+data/cache/
+fixtures/generated/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+secrets/
+*.key
+*.pem
+config/local*
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

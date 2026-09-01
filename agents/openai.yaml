@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Office 文档审计"
+  short_description: "通用 Word 文档审计：检查格式、结构与内容问题并输出审计报告"
+  default_prompt: "使用 $ai-office-document-audit-skill 审计指定的 Word 文档，检查格式、结构与内容并输出审计报告"
