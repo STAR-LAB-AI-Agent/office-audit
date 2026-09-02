@@ -101,6 +101,8 @@ python scripts\demo_audit.py --output-dir outputs\demo --force
 
     python scripts\evaluate_controlled_cases.py --format terminal
 
+课程交付材料草稿见 docs/ai-safety-case-report.md 和 docs/open-source-code-report.md，二者保留当前证据与未完成清单，不替代最终提交版。
+
 ## 结果和覆盖范围
 
 审计结果包含目标文件、审计范围、统计摘要、问题列表、未审计对象列表和运行指标。每条问题记录唯一编号、严重级别、规则编号、结构化位置、证据、问题说明和修复建议；每个未审计对象也单独记录类型、位置、数量、未审计原因、影响和建议，不能只输出一句笼统的“存在未审计对象”。
