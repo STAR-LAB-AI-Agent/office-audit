@@ -1,6 +1,6 @@
 # AI Office 文档审计
 
-这是“智能体开发实战”课程实习的 AI Office 文档审计 Skill。项目对应课程任务书中的 `#03 AI Office 文档审计`，当前已完成可独立运行的 `.docx` 只读审计 CLI 和离线自然语言意图路由，后续再补充公开数据评估和最终交付材料。
+这是“智能体开发实战”课程实习的 AI Office 文档审计 Skill。项目对应课程任务书中的 `#03 AI Office 文档审计`，当前已完成可独立运行的 `.docx` 只读审计 CLI、离线自然语言意图路由、性能基线和公开数据元数据清单；文档级样例核验与最终交付材料仍在推进。
 
 ## 项目定位
 
@@ -27,7 +27,7 @@
 
 ## 已实现的 CLI
 
-当前已完成确定性 `.docx` 审计 CLI、结构化结果模型、基础规则、未审计对象逐项告警、独立报告输出、离线自然语言路由和 10 个回归测试。公开数据评估和最终交付材料将在后续阶段补充。
+当前已完成确定性 `.docx` 审计 CLI、结构化结果模型、基础规则、未审计对象逐项告警、独立报告输出、离线自然语言路由、脱敏 JSONL 日志、性能基线和 10 个回归测试。公开数据研究已形成第一方来源核验文档，并在 `data/public-samples.manifest.json` 中登记 12 条 `pending` 候选；文档级许可/PII 核验和最终交付材料仍在推进。
 
 安装依赖：
 
@@ -70,6 +70,33 @@ python scripts/audit_docx.py `
 
 本项目不会把真实 API 密钥、密码、私人文档或许可证不明的原始数据提交到 Git。公开文档只在确认许可和再分发条件后作为固定测试样例；其他资料保留来源、下载日期、哈希和许可信息，原文件默认不进入仓库。
 
+## 公开数据与本地评估
+
+公开数据来源和许可边界见 [`docs/public-dataset-research.md`](docs/public-dataset-research.md)，机器可读清单见 [`data/public-samples.manifest.json`](data/public-samples.manifest.json)。当前清单只保留来源元数据和 12 条待核验候选，不携带原始 `.docx`；文件级再分发许可和 PII 抽查完成前，候选不得标为 `verified`。
+
+对存放在仓库外、且按 `<candidate-id>.docx` 命名的本地样例，可以运行只读评估器：
+
+```powershell
+python scripts/evaluate_manifest.py `
+  --manifest "data\public-samples.manifest.json" `
+  --sample-root "E:\path\outside\repository\docx-samples" `
+  --mode full `
+  --format markdown `
+  --output "reports\external-evaluation.md"
+```
+
+评估器不会联网下载、不会修改 manifest 或原文，也不会把正文证据写入评估摘要；未提供本地样例时，每条候选会明确显示为 `pending_local_input`。
+
+## 演示与阶段报告
+
+可以用无个人信息的合成文档录制端到端演示：
+
+```powershell
+python scripts\demo_audit.py --output-dir outputs\demo --force
+```
+
+演示分镜见 [`docs/demo-script.md`](docs/demo-script.md)，当前阶段性实验报告见 [`docs/experiment-report.md`](docs/experiment-report.md)。二者都明确区分已完成证据与待核验事项，不能替代最终课程报告。
+
 ## 结果和覆盖范围
 
 审计结果包含目标文件、审计范围、统计摘要、问题列表、未审计对象列表和运行指标。每条问题记录唯一编号、严重级别、规则编号、结构化位置、证据、问题说明和修复建议；每个未审计对象也单独记录类型、位置、数量、未审计原因、影响和建议，不能只输出一句笼统的“存在未审计对象”。
@@ -85,6 +112,14 @@ python -m unittest discover -s tests -v
 ```
 
 当前回归集包含 10 个用例，并验证输入文档字节在审计前后保持不变。
+
+可用临时可控文档进行本地性能/压缩对照（不会保存测试文档）：
+
+```powershell
+python scripts/benchmark_audit.py --sizes 50,200,800 --repeats 3
+```
+
+报告中的 `summary_char_ratio` 是“规则证据摘要字符数 / 输入字符数”的本地压缩代理，不等同于模型 token；`model_calls` 在当前离线实现中应为 0。
 
 ## 本地开发
 

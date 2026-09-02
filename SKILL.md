@@ -59,6 +59,19 @@ python scripts/audit_docx.py --input "report.docx" --mode structure --required-s
 python scripts/audit_docx.py --input "report.docx" --request "检查空字段、占位符和格式" --format json
 ```
 
+需要评估公开数据候选时，使用 `scripts/evaluate_manifest.py` 读取 `data/public-samples.manifest.json` 和仓库外的本地样例。该入口默认不联网、不下载、不修改 manifest 或原文，只输出每条候选的本地状态和审计统计；没有本地文件时必须保留 `pending_local_input`。
+
+```powershell
+python scripts/evaluate_manifest.py `
+  --manifest "data\public-samples.manifest.json" `
+  --sample-root "path\outside\repository\docx-samples" `
+  --format markdown
+```
+
 ## 当前状态
 
-Phase2 已完成确定性 `.docx` 审计 CLI、结构化结果模型、基础规则、未审计对象逐项告警、独立报告输出、脱敏 JSONL 日志、离线自然语言意图路由和 10 个回归测试。`scripts/` 与 `tests/` 已有可运行内容；真实公开文档 manifest、性能对照、演示材料和最终开源检查仍在后续阶段。
+Phase2–4 已完成确定性 `.docx` 审计 CLI、结构化结果模型、基础规则、未审计对象逐项告警、独立报告输出、脱敏 JSONL 日志、离线自然语言意图路由、性能基线、公开数据研究、仅含元数据的 manifest 和 10 个回归测试。当前有 12 条 `pending` 候选；文档级许可/PII 核验、正式样例审计、实际视频录制和最终开源检查仍在后续阶段。
+
+使用 `scripts/benchmark_audit.py` 可在临时生成的可控文档上测量本地耗时和摘要压缩代理。该代理不是模型 token 统计；当前实现的 `model_calls` 应为 0。
+
+使用 `scripts/demo_audit.py` 可生成无个人信息的合成演示文档，复现标题、占位符、空单元格、格式离群和未审计对象告警；演示报告写入被忽略的 `outputs/` 目录，不把任何原始用户文档加入仓库。

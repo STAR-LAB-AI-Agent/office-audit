@@ -1,0 +1,578 @@
+{
+  "schema_version": "1.0",
+  "manifest_type": "public-samples-metadata",
+  "title": "公开文档样例清单（仅元数据）",
+  "generated_at": "2026-09-02T04:38:10Z",
+  "generated_by": "ai-office-document-audit-skill",
+  "evidence_basis": {
+    "document": "docs/public-dataset-research.md",
+    "document_date": "2026-09-02",
+    "method": "仅使用第一方来源（Hugging Face 官方卡片/API、GitHub 官方仓库文件/API、DocxCorp 官方站点/API）核验，并做了少量下载实测；不引用博客、搜索摘要或二手转述。本清单不包含任何从网络新下载的文档，也不包含对未核验事实的断言。"
+  },
+  "policy": {
+    "raw_documents_in_git": false,
+    "metadata_only": true,
+      "raw_location_rule": "原始 .docx 一律放在仓库外，或放在 .gitignore 已排除的 data/raw、data/external、data/downloads、data/cache 目录；manifest 只记录仓库外本地路径索引，不记录文档内容。",
+    "pii_spot_check": {
+      "required": true,
+      "status": "not_started",
+      "note": "当前 candidates 包含 12 条 pending 元数据记录，尚未对任何样例执行 PII 抽查，本清单不含有任何 PII 结论；不得把任何记录标为 verified 直到人工抽查通过。"
+    },
+    "sha256_policy": {
+      "rule": "每个样例必须本地自算 SHA-256 并记录；不得把数据源行 id 当作完整性校验值。",
+      "reason": "VERIFIED（2026-09-02 实测）：从 docxcorp.us 下载的 3 个样本本地 SHA-256 均不等于各自行 id，与官方'id 即文件 SHA-256'声明不符。"
+    }
+  },
+  "verification_labels": {
+    "VERIFIED": "本清单直接在第一方页面/API/仓库文件中读到，或对线上端点实测得到（含时间点）。",
+    "INFERENCE": "基于 VERIFIED 事实的合理推断，可能不成立。",
+    "UNVERIFIED": "无法从第一方来源确认，或第一方声明互相矛盾/缺失；未解决前不作为事实引用。"
+  },
+  "sources": [
+    {
+      "id": "superdoc-dev/docx-corpus",
+      "role": "primary_recommended",
+      "name": "superdoc-dev/docx-corpus (Hugging Face) + DocxCorp 官方下载入口",
+      "kind": "元数据 parquet（73.6 万行）+ 远程 .docx 镜像 + 提取文本端点",
+      "source_url": "https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+      "official_docs": [
+        "https://huggingface.co/datasets/superdoc-dev/docx-corpus/raw/main/README.md",
+        "https://huggingface.co/api/datasets/superdoc-dev/docx-corpus",
+        "https://huggingface.co/api/datasets/superdoc-dev/docx-corpus/tree/main/data",
+        "https://github.com/superdoc-dev/docx-corpus",
+        "https://docxcorp.us/dataset",
+        "https://docxcorp.us/download",
+        "https://docxcorp.us/quality",
+        "https://docxcorp.us/llms.txt"
+      ],
+      "owner": {
+        "name": "SuperDoc（代码 LICENSE 落款 Harbour Enterprises Inc）",
+        "status": "VERIFIED"
+      },
+      "composition": {
+        "description": "HF 仓库只含元数据 parquet（data/train-00000-of-00001.parquet，63,572,941 字节），.docx 本体存放于 DocxCorp 的 Cloudflare R2；行字段为 id, filename, type, topic, language, word_count, confidence, url。",
+        "status": "VERIFIED",
+        "notes": [
+          "rows API（2026-09-02）num_rows_total=736706。",
+          "filename 只是源 URL 里的原始文件名，不代表文件一定是规范命名的 .docx（VERIFIED，官方 schema 说明）。",
+          "官方统计口径（2026-09-02 读取，页面 lastVerified 2026-05-19）：已上传 1,101,537 / 已分类 736,242 / 待分类 267,539 / 待提取 93,440 / 空文本 4,316 / 重复 241,993 / 失败 117,862；语言 76 种。"
+        ]
+      },
+      "version_anchor": [
+        {
+          "label": "HF 仓库 commit sha",
+          "value": "86593bcc2041f2a134258574d7f368bedc694a02",
+          "status": "VERIFIED",
+          "source": "HF 官方 API，2026-09-02"
+        },
+        {
+          "label": "parquet LFS SHA-256",
+          "value": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12",
+          "status": "VERIFIED",
+          "source": "HF tree API，2026-09-02"
+        },
+        {
+          "label": "parquet git blob oid",
+          "value": "99a60c75cad9bca70ae19dc46bb72419c0acab85",
+          "status": "VERIFIED",
+          "source": "HF tree API，2026-09-02"
+        },
+        {
+          "label": "HF createdAt / lastModified",
+          "value": "2026-03-09T19:43:52Z / 2026-03-09T19:46:50Z",
+          "status": "VERIFIED",
+          "note": "GitHub 仓库 pushed_at=2026-08-11T12:31:56Z，仍在更新；引用数字时必须以具体快照（上述锚点）为准并注明日期。"
+        }
+      ],
+      "licenses": [
+        {
+          "scope": "元数据（含 url 列）",
+          "statement": "ODC-BY 1.0",
+          "status": "VERIFIED",
+          "note": "官方声明在四处第一方位置一致出现（download 页、dataset 页、首页 JSON-LD、HF 卡片 YAML）；具体义务以 ODC-BY 1.0 文本为准。"
+        },
+        {
+          "scope": "管道/源码",
+          "statement": "MIT",
+          "status": "VERIFIED",
+          "note": "GitHub 仓库 LICENSE 文件，落款 Copyright (c) 2026 Harbour Enterprises Inc。"
+        },
+        {
+          "scope": ".docx 文档本体",
+          "statement": "版权归原作者",
+          "status": "VERIFIED_declaration",
+          "note": "官方明示'单个文档内容保留原作者版权'；文件级再分发许可 UNVERIFIED——不能由数据集 ODC-BY 推断可以自由再分发某份文档。"
+        }
+      ],
+      "redistribution": {
+        "metadata": {
+          "allows": true,
+          "conditions": "按 ODC-BY 1.0 署名来源；可再分发",
+          "status": "VERIFIED"
+        },
+        "documents": {
+          "allows": "unknown_per_file",
+          "status": "UNVERIFIED",
+          "note": "需逐份结合来源站点条款判断再分发条件；未核验前不放入公开仓库。"
+        },
+        "prohibited_actions": [
+          "不把 .docx 原文或 extracted/*.txt 全文重新发布到公开仓库",
+          "不全量下载/镜像 docxcorp R2",
+          "不把行 id 当作文件哈希写入 manifest"
+        ]
+      },
+      "risk": {
+        "pii": {
+          "status": "INFERENCE",
+          "note": "第一方资料无脱敏/PII 过滤声明；数据类型含 forms/correspondence/government/healthcare 等真实网络文档，很可能含个人信息；选用样本前必须人工抽查提取文本。"
+        },
+        "takedown": {
+          "status": "VERIFIED",
+          "note": "官方 takedown 通道：help@docxcorp.us，附哈希/URL/所有权证明，承诺 7 天内处理。"
+        }
+      },
+      "hash_verification": {
+        "status": "VERIFIED",
+        "note": "2026-09-02 实测：按行 url 下载 3 个 .docx，本地 SHA-256 均不等于行 id（详见下方 evidence.research_probes）；官方无解释。故 manifest 一律自算 SHA-256。"
+      },
+      "download_options": {
+        "status": "VERIFIED",
+        "entries": [
+          "HF parquet（元数据）",
+          "https://api.docxcorp.us/manifest?type=&topic=&lang=&min_confidence=（每次响应上限 2M 条 URL）",
+          "https://docxcorp.us/documents/{id}.docx（单文件）",
+          "https://docxcorp.us/extracted/{id}.txt（提取文本预览，HEAD 实测 HTTP 200）"
+        ]
+      },
+      "citation": "docx-corpus (2026), https://docxcorp.us；数据集页 https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+      "next_actions": [
+        "按 selection_plan 从 HF parquet 挑选候选行（此阶段不下载）。",
+        "用 extracted/{id}.txt 预览文本做人工 PII 抽查，通过后才考虑下载原文。",
+        "下载到仓库外/被忽略目录，记录 downloaded_at_utc、字节数、本地自算 SHA-256。",
+        "逐份核对来源站点再分发条款并记录；全部满足后才把记录标为 verified。"
+      ]
+    },
+    {
+      "id": "DS3Lab/WordScape",
+      "role": "backup_later_enhancement",
+      "name": "DS3Lab/WordScape (GitHub)",
+      "kind": "管道代码 + 9.4M 条 URL 列表（含 SHA-256 校验和），不重分发文档本体",
+      "source_url": "https://github.com/DS3Lab/WordScape",
+      "official_docs": [
+        "https://github.com/DS3Lab/WordScape/blob/main/README.md",
+        "https://github.com/DS3Lab/WordScape/blob/main/LICENSE",
+        "https://github.com/DS3Lab/WordScape/blob/main/README_DOWNLOAD.md"
+      ],
+      "owner": {
+        "name": "DS3Lab 组织；NeurIPS 2023 论文配套代码（仓库内自述）",
+        "status": "VERIFIED"
+      },
+      "composition": {
+        "description": "发布 Common Crawl 快照 URL 列表（2013-48、2016-50、2020-40、2021-43、2023-06、2023-14，合计 9,418,228 条，官方 README 表格），文档需用户自行从原始站点下载。",
+        "status": "VERIFIED",
+        "notes": [
+          "接入成本高：需自建下载+解析管道，原始 URL 可达性无法保证。",
+          "Google Drive 7 个分享页 2026-09-02 实测 HTTP 200，但仅证明分享页可达；列表文件内容/大小/哈希未验证（UNVERIFIED）。"
+        ]
+      },
+      "version_anchor": [
+        {
+          "label": "数据版本标识",
+          "value": "Common Crawl 快照号（如 CC-MAIN-2023-14）",
+          "status": "VERIFIED"
+        },
+        {
+          "label": "代码版本",
+          "value": "无 tag/release（GitHub API 2026-09-02 返回空），只能以 commit 记录",
+          "status": "VERIFIED"
+        }
+      ],
+      "licenses": [
+        {
+          "scope": "仓库代码",
+          "statement": "Apache License 2.0",
+          "status": "VERIFIED",
+          "note": "LICENSE 文件全文 + GitHub API license 字段均确认。"
+        },
+        {
+          "scope": "URL 列表数据集",
+          "statement": "未声明独立许可",
+          "status": "UNVERIFIED",
+          "note": "仓库内未发现针对 URL 列表的许可文件；在再分发许可未解决前不把列表文件提交进 Git。"
+        }
+      ],
+      "redistribution": {
+        "documents": {
+          "allows": "not_redistributed",
+          "status": "VERIFIED",
+          "note": "WordScape 不重分发文档；从原始站点下载是否允许需逐站点判断（UNVERIFIED）。"
+        },
+        "url_lists": {
+          "allows": "unknown",
+          "status": "UNVERIFIED",
+          "note": "列表文件的再分发许可没有第一方声明。"
+        }
+      },
+      "risk": {
+        "pii": {
+          "status": "INFERENCE",
+          "note": "仓库内无 PII/脱敏声明；文档来自公共网络，类型与 docx-corpus 类似，很可能含个人信息。"
+        }
+      },
+      "hash_verification": {
+        "status": "VERIFIED_declaration",
+        "note": "官方 README 声明 URL 列表自带每文档 SHA-256 校验和，下载环节保存响应 SHA-256 以防投毒；未实测比对该列表与实际下载文件。"
+      },
+      "citation": "见仓库 README Citation 段（NeurIPS 2023 论文与作者列表；未对外部出版物交叉核验）",
+      "next_actions": [
+        "当前阶段不接入；如后续需要，先小批量验证原始站点可达性。",
+        "解决 URL 列表再分发许可（UNVERIFIED）前，不把列表文件提交进 Git。"
+      ]
+    }
+  ],
+  "selection_plan": {
+    "note": "以下过滤条件取自 docs/public-dataset-research.md §5（基于上述 VERIFIED 事实的推荐）；已按该标准挑选 12 条 pending 元数据记录，尚未完成文档级核验。",
+    "status": "in_progress",
+    "target_count_range": "8-20",
+    "preferred_types": ["reports", "policies", "educational", "administrative", "correspondence"],
+    "excluded_types_for_public_samples": ["healthcare", "forms", "government"],
+    "filters": {
+      "confidence_min": 0.8,
+      "word_count_range": [100, 5000],
+      "languages": ["en", "zh"]
+    },
+    "per_record_required_fields": [
+      {"field": "id", "note": "数据源行 id，不得作为文件哈希"},
+      {"field": "source_id", "note": "来自哪个数据源"},
+      {"field": "url", "note": "单文件下载 URL"},
+      {"field": "type", "note": "数据源标注的文档类型"},
+      {"field": "topic", "note": "数据源标注的主题"},
+      {"field": "language", "note": "数据源标注的语言"},
+      {"field": "confidence", "note": "数据源标注的置信度（官方说明未校准）"},
+      {"field": "word_count", "note": "数据源标注的词数（可能存在巨型文档）"},
+      {"field": "downloaded_at_utc", "note": "下载时间（UTC，ISO 8601）"},
+      {"field": "byte_size", "note": "下载字节数"},
+      {"field": "local_sha256", "note": "本地自算 SHA-256，必须补填"},
+      {"field": "version_anchor", "note": "对应 HF commit sha + parquet LFS SHA-256"},
+      {"field": "license_declaration", "note": "元数据 ODC-BY 1.0 / 文档版权归原作者"},
+      {"field": "redistribution_status", "note": "逐份核对后再分发条件"},
+      {"field": "pii_spot_check", "note": "人工抽查结论（无结论不得填'通过'）"},
+      {"field": "citation", "note": "引用方式"},
+      {"field": "local_path_outside_git", "note": "仅记录仓库外本地路径"},
+      {"field": "status", "note": "pending | verified | rejected"}
+    ],
+    "verification_gate": "候选记录只有在：逐份许可/再分发核对完成、人工 PII 抽查通过、且不含可识别个人信息后，才可把 status 从 pending 提升为 verified，并才允许进入公开仓库。"
+  },
+  "candidates": {
+    "status": "pending",
+    "selected_at_utc": "2026-09-02T04:47:56Z",
+    "selection_source": "Hugging Face datasets-server rows API；使用 2026-09-02 获取的 train 元数据，按 confidence>=0.8、100<=word_count<=5000、language in {en,zh} 且排除 type/topic 为 healthcare、forms、government 过滤。",
+    "note": "已选择 12 个候选元数据记录，但尚未下载、哈希、人工 PII 抽查或逐份核对文档再分发许可；全部保持 pending，不代表已通过审计或适合公开分发。",
+    "records": [
+      {
+        "id": "0000439f0e09bad3cf0ff248690ae45e55120be8bdb42a8533f7e117bc4f7007",
+        "source_id": "superdoc-dev/docx-corpus",
+        "url": "https://docxcorp.us/documents/0000439f0e09bad3cf0ff248690ae45e55120be8bdb42a8533f7e117bc4f7007.docx",
+        "filename": "hsaagenda-15-16.docx",
+        "type": "administrative",
+        "topic": "education",
+        "language": "en",
+        "confidence": 0.9823228716850281,
+        "word_count": 232,
+        "metadata_status": "VERIFIED",
+        "downloaded_at_utc": null,
+        "byte_size": null,
+        "local_sha256": null,
+        "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
+        "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
+        "redistribution_status": "UNVERIFIED",
+        "pii_spot_check": {"status": "not_started", "result": null, "note": "未读取 extracted 文本，不能推断无 PII"},
+        "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+        "local_path_outside_git": null,
+        "status": "pending",
+        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+      },
+      {
+        "id": "0000a9d635d75ad4cc33de7e5f55ccfa77e9bcc2af5ddb60a522cb4253ca62ab",
+        "source_id": "superdoc-dev/docx-corpus",
+        "url": "https://docxcorp.us/documents/0000a9d635d75ad4cc33de7e5f55ccfa77e9bcc2af5ddb60a522cb4253ca62ab.docx",
+        "filename": "content",
+        "type": "reference",
+        "topic": "education",
+        "language": "en",
+        "confidence": 0.8088721632957458,
+        "word_count": 3101,
+        "metadata_status": "VERIFIED",
+        "downloaded_at_utc": null,
+        "byte_size": null,
+        "local_sha256": null,
+        "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
+        "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
+        "redistribution_status": "UNVERIFIED",
+        "pii_spot_check": {"status": "not_started", "result": null, "note": "未读取 extracted 文本，不能推断无 PII"},
+        "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+        "local_path_outside_git": null,
+        "status": "pending",
+        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+      },
+      {
+        "id": "000191ed2e82543361847868fcbde0c31954b3f2457da9238ebfe2509cb7788a",
+        "source_id": "superdoc-dev/docx-corpus",
+        "url": "https://docxcorp.us/documents/000191ed2e82543361847868fcbde0c31954b3f2457da9238ebfe2509cb7788a.docx",
+        "filename": "unknown.docx",
+        "type": "correspondence",
+        "topic": "education",
+        "language": "en",
+        "confidence": 0.9490006566047668,
+        "word_count": 263,
+        "metadata_status": "VERIFIED",
+        "downloaded_at_utc": null,
+        "byte_size": null,
+        "local_sha256": null,
+        "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
+        "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
+        "redistribution_status": "UNVERIFIED",
+        "pii_spot_check": {"status": "not_started", "result": null, "note": "未读取 extracted 文本，不能推断无 PII"},
+        "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+        "local_path_outside_git": null,
+        "status": "pending",
+        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+      },
+      {
+        "id": "0001ce58b20a6729690ff8178acb64d5dc5aae19faea05efdf904b5286d0f4b4",
+        "source_id": "superdoc-dev/docx-corpus",
+        "url": "https://docxcorp.us/documents/0001ce58b20a6729690ff8178acb64d5dc5aae19faea05efdf904b5286d0f4b4.docx",
+        "filename": "download",
+        "type": "administrative",
+        "topic": "nonprofit",
+        "language": "en",
+        "confidence": 0.8418747782707214,
+        "word_count": 302,
+        "metadata_status": "VERIFIED",
+        "downloaded_at_utc": null,
+        "byte_size": null,
+        "local_sha256": null,
+        "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
+        "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
+        "redistribution_status": "UNVERIFIED",
+        "pii_spot_check": {"status": "not_started", "result": null, "note": "未读取 extracted 文本，不能推断无 PII"},
+        "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+        "local_path_outside_git": null,
+        "status": "pending",
+        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+      },
+      {
+        "id": "0003daa8cf8b58a2049c852db87db194c46324bc70b91c4824cf04f7fb5c0fa6",
+        "source_id": "superdoc-dev/docx-corpus",
+        "url": "https://docxcorp.us/documents/0003daa8cf8b58a2049c852db87db194c46324bc70b91c4824cf04f7fb5c0fa6.docx",
+        "filename": "download",
+        "type": "educational",
+        "topic": "general",
+        "language": "en",
+        "confidence": 0.9118648767471313,
+        "word_count": 520,
+        "metadata_status": "VERIFIED",
+        "downloaded_at_utc": null,
+        "byte_size": null,
+        "local_sha256": null,
+        "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
+        "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
+        "redistribution_status": "UNVERIFIED",
+        "pii_spot_check": {"status": "not_started", "result": null, "note": "未读取 extracted 文本，不能推断无 PII"},
+        "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+        "local_path_outside_git": null,
+        "status": "pending",
+        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+      },
+      {
+        "id": "000407cd6c79442ca73c72003321fd71054f8782c4fe240053c9ac064efdb5b6",
+        "source_id": "superdoc-dev/docx-corpus",
+        "url": "https://docxcorp.us/documents/000407cd6c79442ca73c72003321fd71054f8782c4fe240053c9ac064efdb5b6.docx",
+        "filename": "20241116053101_20_schoolmotto.docx",
+        "type": "correspondence",
+        "topic": "education",
+        "language": "en",
+        "confidence": 0.9363939166069031,
+        "word_count": 278,
+        "metadata_status": "VERIFIED",
+        "downloaded_at_utc": null,
+        "byte_size": null,
+        "local_sha256": null,
+        "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
+        "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
+        "redistribution_status": "UNVERIFIED",
+        "pii_spot_check": {"status": "not_started", "result": null, "note": "未读取 extracted 文本，不能推断无 PII"},
+        "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+        "local_path_outside_git": null,
+        "status": "pending",
+        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+      },
+      {
+        "id": "000555ad3cc8f054f9e204131fe47bf96530b1159dca443b14ef83d1fcf051c0",
+        "source_id": "superdoc-dev/docx-corpus",
+        "url": "https://docxcorp.us/documents/000555ad3cc8f054f9e204131fe47bf96530b1159dca443b14ef83d1fcf051c0.docx",
+        "filename": "file",
+        "type": "educational",
+        "topic": "general",
+        "language": "en",
+        "confidence": 0.9597741961479187,
+        "word_count": 3091,
+        "metadata_status": "VERIFIED",
+        "downloaded_at_utc": null,
+        "byte_size": null,
+        "local_sha256": null,
+        "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
+        "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
+        "redistribution_status": "UNVERIFIED",
+        "pii_spot_check": {"status": "not_started", "result": null, "note": "未读取 extracted 文本，不能推断无 PII"},
+        "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+        "local_path_outside_git": null,
+        "status": "pending",
+        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+      },
+      {
+        "id": "000949a04e086caa49e35395dbfbf48dec55bde8d08a58ce4ae2c3d83007965d",
+        "source_id": "superdoc-dev/docx-corpus",
+        "url": "https://docxcorp.us/documents/000949a04e086caa49e35395dbfbf48dec55bde8d08a58ce4ae2c3d83007965d.docx",
+        "filename": "ADVERTISEMENTFORBIDLakeWoodRoofReplacement.docx",
+        "type": "legal",
+        "topic": "education",
+        "language": "en",
+        "confidence": 0.9691352844238281,
+        "word_count": 484,
+        "metadata_status": "VERIFIED",
+        "downloaded_at_utc": null,
+        "byte_size": null,
+        "local_sha256": null,
+        "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
+        "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
+        "redistribution_status": "UNVERIFIED",
+        "pii_spot_check": {"status": "not_started", "result": null, "note": "未读取 extracted 文本，不能推断无 PII"},
+        "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+        "local_path_outside_git": null,
+        "status": "pending",
+        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+      },
+      {
+        "id": "0009d7670d7636e99900e829d18584b453f3a1dd4d7bcc2eb8169da6cc18014f",
+        "source_id": "superdoc-dev/docx-corpus",
+        "url": "https://docxcorp.us/documents/0009d7670d7636e99900e829d18584b453f3a1dd4d7bcc2eb8169da6cc18014f.docx",
+        "filename": "FLOW_RATES_DalMax_Sump_and_Grates.docx",
+        "type": "technical",
+        "topic": "environment",
+        "language": "en",
+        "confidence": 0.918117880821228,
+        "word_count": 693,
+        "metadata_status": "VERIFIED",
+        "downloaded_at_utc": null,
+        "byte_size": null,
+        "local_sha256": null,
+        "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
+        "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
+        "redistribution_status": "UNVERIFIED",
+        "pii_spot_check": {"status": "not_started", "result": null, "note": "未读取 extracted 文本，不能推断无 PII"},
+        "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+        "local_path_outside_git": null,
+        "status": "pending",
+        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+      },
+      {
+        "id": "0009e9db54323f44d57d185826448b6e7c8a58abd36901433179f977e6a513fc",
+        "source_id": "superdoc-dev/docx-corpus",
+        "url": "https://docxcorp.us/documents/0009e9db54323f44d57d185826448b6e7c8a58abd36901433179f977e6a513fc.docx",
+        "filename": "21909085",
+        "type": "policies",
+        "topic": "education",
+        "language": "en",
+        "confidence": 0.9737238883972168,
+        "word_count": 656,
+        "metadata_status": "VERIFIED",
+        "downloaded_at_utc": null,
+        "byte_size": null,
+        "local_sha256": null,
+        "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
+        "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
+        "redistribution_status": "UNVERIFIED",
+        "pii_spot_check": {"status": "not_started", "result": null, "note": "未读取 extracted 文本，不能推断无 PII"},
+        "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+        "local_path_outside_git": null,
+        "status": "pending",
+        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+      },
+      {
+        "id": "000aac6d4310d6f03a1250137aa4af40e8bcc07f316f67f61e93edbd2d495555",
+        "source_id": "superdoc-dev/docx-corpus",
+        "url": "https://docxcorp.us/documents/000aac6d4310d6f03a1250137aa4af40e8bcc07f316f67f61e93edbd2d495555.docx",
+        "filename": "hVv7xJeQwu2btAFiBxWm",
+        "type": "educational",
+        "topic": "education",
+        "language": "en",
+        "confidence": 0.9662472605705261,
+        "word_count": 587,
+        "metadata_status": "VERIFIED",
+        "downloaded_at_utc": null,
+        "byte_size": null,
+        "local_sha256": null,
+        "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
+        "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
+        "redistribution_status": "UNVERIFIED",
+        "pii_spot_check": {"status": "not_started", "result": null, "note": "未读取 extracted 文本，不能推断无 PII"},
+        "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+        "local_path_outside_git": null,
+        "status": "pending",
+        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+      },
+      {
+        "id": "000c2f182dad8bdde27a9275da7ad9f227a0f331b47c31da3a4d35a82b6056ff",
+        "source_id": "superdoc-dev/docx-corpus",
+        "url": "https://docxcorp.us/documents/000c2f182dad8bdde27a9275da7ad9f227a0f331b47c31da3a4d35a82b6056ff.docx",
+        "filename": "Course description for MyCourses fall 2020.docx",
+        "type": "educational",
+        "topic": "education",
+        "language": "en",
+        "confidence": 0.9824823141098022,
+        "word_count": 289,
+        "metadata_status": "VERIFIED",
+        "downloaded_at_utc": null,
+        "byte_size": null,
+        "local_sha256": null,
+        "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
+        "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
+        "redistribution_status": "UNVERIFIED",
+        "pii_spot_check": {"status": "not_started", "result": null, "note": "未读取 extracted 文本，不能推断无 PII"},
+        "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
+        "local_path_outside_git": null,
+        "status": "pending",
+        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+      }
+    ]
+  },
+  "evidence": {
+    "research_probes": {
+      "status": "VERIFIED",
+      "note": "以下 3 个样本是 docs/public-dataset-research.md 核验期间的下载探针（2026-09-02，仅存于系统临时目录，从未进入本仓库），不是选中的公开样例。研究文档只记录了 SHA-256 前缀，故此处仅转写前缀（complete=false），完整哈希未记录。",
+      "probes": [
+        {"row_index": 0, "byte_size": 40085, "sha256_prefix": "a67dcf9e", "complete": false, "id_matches_hash": false},
+        {"row_index": 1, "byte_size": 770159, "sha256_prefix": "3bfcb371", "complete": false, "id_matches_hash": false},
+        {"row_index": 2, "byte_size": 24880, "sha256_prefix": "9c6ef497", "complete": false, "id_matches_hash": false}
+      ]
+    },
+    "numeric_discrepancy_notes": {
+      "status": "VERIFIED_observation",
+      "notes": [
+        "首页 JSON-LD 与 GitHub README 写 '46+ languages'；卡片/dataset/quality/llms.txt 写 76 种；HF YAML 语言标签只列 20 个代码。",
+        "HF rows API 行数 736,706（2026-09-02）；官网/llms.txt 写已分类 736,242（页面 lastVerified 2026-05-19）。",
+        "引用任何数字时必须写明来源与日期，不能当作单一权威口径。"
+      ]
+    }
+  },
+  "next_actions": [
+    "已从 HF rows API 按 selection_plan 过滤挑选 12 个 pending 候选行；后续需固定 HF 快照并复核记录。",
+    "对候选行先用 extracted/{id}.txt 预览文本做人工 PII 抽查；通过后再下载原文。",
+    "下载原文到仓库外或 data/ 下被 gitignore 排除的目录；逐条补填 downloaded_at_utc、byte_size、local_sha256（自算）。",
+    "逐份核对来源站点再分发条款和许可声明并记录。",
+    "全部条件满足后，把记录 status 提升为 verified；文档本体始终不入 Git。",
+    "WordScape 维持 backup 状态：先解决 URL 列表再分发许可（UNVERIFIED）并验证原站可达性，再评估是否接入。",
+    "保持本清单与 docs/public-dataset-research.md 的口径一致；任何数字引用带来源与日期。"
+  ]
+}
