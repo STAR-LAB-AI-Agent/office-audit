@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "manifest_type": "controlled-audit-cases",
+  "title": "受控 Word 缺陷样例标签",
+  "policy": {
+    "raw_documents_in_git": false,
+    "generation": "每次评估时在系统临时目录生成，运行结束后由临时目录生命周期处理",
+    "contains_personal_information": false,
+    "label_meaning": "expected_findings 和 expected_unsupported 只描述本项目确定性规则应命中的标签，不代表真实文档的人工质量结论"
+  },
+  "cases": [
+    {
+      "id": "clean-general-document",
+      "builder": "clean_general_document",
+      "mode": "full",
+      "description": "标题、正文和表格均有内容的通用文档基线",
+      "expected_summary": {"error": 0, "warning": 0},
+      "expected_findings": [],
+      "expected_unsupported": []
+    },
+    {
+      "id": "heading-level-jump",
+      "builder": "heading_level_jump",
+      "mode": "structure",
+      "description": "一级标题后直接出现三级标题",
+      "expected_summary": {"error": 0},
+      "expected_findings": [
+        {"rule_id": "structure.heading_level_jump", "severity": "warning"}
+      ],
+      "expected_unsupported": []
+    },
+    {
+      "id": "required-section-missing",
+      "builder": "required_section_missing",
+      "mode": "structure",
+      "required_sections": ["项目说明", "风险与建议"],
+      "description": "用户明确要求的章节清单中缺少一个章节",
+      "expected_summary": {"error": 1},
+      "expected_findings": [
+        {"rule_id": "structure.required_section_missing", "severity": "error"}
+      ],
+      "expected_unsupported": []
+    },
+    {
+      "id": "empty-placeholder-and-format",
+      "builder": "empty_placeholder_and_format",
+      "mode": "fields_format",
+      "description": "包含空段落、空单元格、TODO 占位符和同类段落格式离群",
+      "expected_summary": {"error": 0},
+      "expected_findings": [
+        {"rule_id": "fields.empty_paragraph", "severity": "warning"},
+        {"rule_id": "fields.empty_cell", "severity": "warning"},
+        {"rule_id": "fields.placeholder", "severity": "warning"},
+        {"rule_id": "format.dominant_style_outlier", "severity": "warning"}
+      ],
+      "expected_unsupported": []
+    },
+    {
+      "id": "unsupported-drawing-object",
+      "builder": "unsupported_drawing_object",
+      "mode": "full",
+      "description": "含绘图 XML 对象，验证逐项未审计对象告警",
+      "expected_summary": {"error": 0},
+      "expected_findings": [],
+      "expected_unsupported": ["image_or_drawing"]
+    }
+  ]
+}

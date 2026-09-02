@@ -68,6 +68,10 @@ python scripts/evaluate_manifest.py `
   --format markdown
 ```
 
+需要验证确定性规则时，使用 scripts/evaluate_controlled_cases.py。它在系统临时目录生成不含个人信息的受控 .docx 变体，按 fixtures/controlled-cases.json 比对期望标签，结束后不保留变体，也不联网：
+
+    python scripts\evaluate_controlled_cases.py --format terminal
+
 ## 当前状态
 
 Phase2–4 已完成确定性 `.docx` 审计 CLI、结构化结果模型、基础规则、未审计对象逐项告警、独立报告输出、脱敏 JSONL 日志、离线自然语言意图路由、性能基线、公开数据研究、仅含元数据的 manifest 和 10 个回归测试。当前有 12 条 `pending` 候选；文档级许可/PII 核验、正式样例审计、实际视频录制和最终开源检查仍在后续阶段。

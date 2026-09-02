@@ -97,6 +97,10 @@ python scripts\demo_audit.py --output-dir outputs\demo --force
 
 演示分镜见 [`docs/demo-script.md`](docs/demo-script.md)，当前阶段性实验报告见 [`docs/experiment-report.md`](docs/experiment-report.md)。二者都明确区分已完成证据与待核验事项，不能替代最终课程报告。
 
+受控缺陷标签验收见 docs/controlled-cases.md。脚本每次在临时目录生成无个人信息的 .docx 变体，验证标题跳级、缺章节、空字段、占位符、格式离群和未审计对象；变体不进入仓库：
+
+    python scripts\evaluate_controlled_cases.py --format terminal
+
 ## 结果和覆盖范围
 
 审计结果包含目标文件、审计范围、统计摘要、问题列表、未审计对象列表和运行指标。每条问题记录唯一编号、严重级别、规则编号、结构化位置、证据、问题说明和修复建议；每个未审计对象也单独记录类型、位置、数量、未审计原因、影响和建议，不能只输出一句笼统的“存在未审计对象”。
