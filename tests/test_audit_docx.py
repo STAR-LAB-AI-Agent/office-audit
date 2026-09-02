@@ -153,23 +153,33 @@ class AuditDocxTests(unittest.TestCase):
             directory = Path(temp)
             source = self._write_sample(directory)
             report = directory / "reports" / "result.md"
+            log = directory / "logs" / "audit.jsonl"
             before = source.read_bytes()
             exit_code = main(
                 [
                     "--input",
                     str(source),
+                    "--request",
+                    "结构审计，备注 sk-test-secret",
                     "--mode",
                     "structure",
                     "--format",
                     "markdown",
                     "--output",
                     str(report),
+                    "--log",
+                    str(log),
                 ]
             )
 
             self.assertEqual(exit_code, 0)
             self.assertTrue(report.is_file())
             self.assertIn("# AI Office 文档审计", report.read_text(encoding="utf-8"))
+            log_text = log.read_text(encoding="utf-8")
+            self.assertIn('"event":"audit_completed"', log_text)
+            self.assertNotIn("TODO", log_text)
+            self.assertNotIn("evidence", log_text)
+            self.assertNotIn("sk-test-secret", log_text)
             self.assertEqual(before, source.read_bytes())
 
     def test_cli_rejects_report_path_that_overwrites_source(self) -> None:

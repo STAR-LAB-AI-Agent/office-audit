@@ -42,7 +42,8 @@ python scripts/audit_docx.py `
   --input "path\to\document.docx" `
   --mode full `
   --format json `
-  --output "reports\audit.json"
+  --output "reports\audit.json" `
+  --log "logs\audit.jsonl"
 ```
 
 也可以直接用自然语言请求推断审计模式；关键词路由会把综合检查、标题/章节检查、空字段/格式检查分别映射到 `full`、`structure`、`fields_format`。范围冲突或无法识别的请求会返回结构化错误，不会擅自选择模式。
@@ -83,7 +84,7 @@ python scripts/audit_docx.py `
 python -m unittest discover -s tests -v
 ```
 
-当前回归集包含 8 个用例，并验证输入文档字节在审计前后保持不变。
+当前回归集包含 10 个用例，并验证输入文档字节在审计前后保持不变。
 
 ## 本地开发
 

@@ -47,8 +47,9 @@ CLI 位于 `scripts/audit_docx.py`，支持以下参数：
 - `--rules FILE`：JSON 规则配置；
 - `--format json|markdown|terminal`：结果投影，默认 JSON；
 - `--output PATH`：独立报告路径，不能覆盖输入文档。
+- `--log PATH`：可选的脱敏 JSONL 日志路径，不能与输入或报告路径相同。
 
-结果至少包含目标文件、审计范围、错误/警告/信息统计、`findings`、`unsupported_objects` 和运行指标。`findings` 逐条保留编号、严重级别、规则、位置、证据和建议；`unsupported_objects` 逐条保留类型、位置、数量、原因、影响和建议。
+结果至少包含目标文件、审计范围、错误/警告/信息统计、`findings`、`unsupported_objects` 和运行指标。`findings` 逐条保留编号、严重级别、规则、位置、证据和建议；`unsupported_objects` 逐条保留类型、位置、数量、原因、影响和建议。日志只记录模式、统计、耗时、对象计数、模型调用数和错误码，不记录正文、证据、自然语言请求或密钥。
 
 示例：
 
@@ -60,4 +61,4 @@ python scripts/audit_docx.py --input "report.docx" --request "检查空字段、
 
 ## 当前状态
 
-Phase2 已完成确定性 `.docx` 审计 CLI、结构化结果模型、基础规则、未审计对象逐项告警、独立报告输出、离线自然语言意图路由和 10 个回归测试。`scripts/` 与 `tests/` 已有可运行内容；真实公开文档 manifest、性能对照、演示材料和最终开源检查仍在后续阶段。
+Phase2 已完成确定性 `.docx` 审计 CLI、结构化结果模型、基础规则、未审计对象逐项告警、独立报告输出、脱敏 JSONL 日志、离线自然语言意图路由和 10 个回归测试。`scripts/` 与 `tests/` 已有可运行内容；真实公开文档 manifest、性能对照、演示材料和最终开源检查仍在后续阶段。

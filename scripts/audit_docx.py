@@ -987,6 +987,23 @@ def _emit(result: Mapping[str, Any], format_name: str, output_value: str | None)
     sys.stdout.write(rendered)
 
 
+def _append_audit_log(result: Mapping[str, Any], log_path: Path) -> None:
+    """Append one metadata-only JSONL record without document evidence."""
+
+    errors = result.get("errors", [])
+    record = {
+        "event": "audit_completed",
+        "schema_version": result.get("schema_version"),
+        "mode": result.get("mode"),
+        "summary": dict(result.get("summary", {})),
+        "metrics": dict(result.get("metrics", {})),
+        "error_codes": [item.get("code") for item in errors if isinstance(item, Mapping)],
+    }
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with log_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Audit a .docx document without modifying the source file.")
     parser.add_argument("--input", required=True, help="path to the .docx document")
@@ -996,6 +1013,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--rules", help="JSON rule configuration")
     parser.add_argument("--format", choices=SUPPORTED_FORMATS, default="json", dest="format_name")
     parser.add_argument("--output", help="separate report path; never overwrite --input")
+    parser.add_argument("--log", help="optional metadata-only JSONL log path")
     return parser
 
 
@@ -1026,11 +1044,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         sections = _load_required_sections(args.required_sections)
         input_path = _resolved_path(args.input)
         output_path = _resolved_path(args.output) if args.output else None
-        if output_path is not None and _same_path(input_path, output_path):
+        log_path = _resolved_path(args.log) if args.log else None
+        if (
+            (output_path is not None and _same_path(input_path, output_path))
+            or (log_path is not None and _same_path(input_path, log_path))
+            or (output_path is not None and log_path is not None and _same_path(output_path, log_path))
+        ):
             result = _base_result(input_path, selected_mode)
             if routing is not None:
                 result["request_routing"] = routing
-            _add_error(result, "unsafe_output_path", "报告输出路径不能覆盖输入文档", str(output_path))
+            _add_error(result, "unsafe_output_path", "报告或日志路径不能覆盖输入文档或彼此覆盖")
             result = _finalize(result, time.perf_counter())
             _emit(result, args.format_name, None)
             return 2
@@ -1042,6 +1065,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         if routing is not None:
             result["request_routing"] = routing
+        if log_path is not None:
+            try:
+                _append_audit_log(result, log_path)
+            except OSError as exc:
+                _add_error(result, "log_output_error", "日志写入失败", type(exc).__name__)
+                result["summary"]["error"] += 1
         _emit(result, args.format_name, str(output_path) if output_path else None)
         return 2 if result.get("errors") else 0
     except AuditInputError as exc:
@@ -1066,4 +1095,10 @@ if __name__ == "__main__":
     raise SystemExit(main())
 
 
-__all__ = ["audit_document", "build_parser", "classify_request", "main", "render_result"]
+__all__ = [
+    "audit_document",
+    "build_parser",
+    "classify_request",
+    "main",
+    "render_result",
+]
