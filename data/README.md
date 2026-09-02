@@ -9,7 +9,7 @@
 - `.gitignore` 已排除 `data/raw/`、`data/external/`、`data/downloads/`、`data/cache/`。原始文档只能存放在
   这些被忽略目录或仓库外，任何情况下都不得把 .docx 原文、`extracted/*.txt` 全文提交进 Git。
 - manifest 中的 `local_path_outside_git` 字段只记录仓库外本地路径，作为取用索引，不代表文件进入仓库。
-- 本仓库当前有 12 条 `pending` 候选元数据记录（`candidates.records`），但没有下载任何新文档；候选记录不等于已通过许可或 PII 审查。
+- 本仓库当前有 12 条 `pending` 候选元数据记录（`candidates.records`），没有把任何原始文档提交到仓库；候选记录不等于已通过许可或 PII 审查。2026-09-02 曾对前 3 条候选做仓库外临时预检，结果和本地哈希记录在 manifest 的 `evidence.external_preflight` 中；临时原始文件仍在系统 Temp，未进入仓库，主动清理受桌面安全策略阻止。
 
 ## 2. 元数据/代码与文档版权边界
 
@@ -26,7 +26,7 @@
 
 ## 3. PII 抽查状态
 
-当前状态：`pii_spot_check.status = "not_started"`，12 条候选记录均为 `pending`，**本清单不含任何 PII 结论**。
+当前状态：`pii_spot_check.status = "not_started"`，12 条候选记录均为 `pending`，**本清单不含任何 PII 结论**。外部预检只验证了下载和解析链路，不改变这一状态。
 后续流程固定为：先用 `extracted/{id}.txt` 预览文本做人工抽查 → 通过后才下载原文 →
 在记录里填写抽查结论 → 全部满足后才允许提升为 `verified`。未抽查的记录一律保持 `pending`，
 不得填“通过”。

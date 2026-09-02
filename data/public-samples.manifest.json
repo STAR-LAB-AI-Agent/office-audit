@@ -548,6 +548,52 @@
     ]
   },
   "evidence": {
+    "external_preflight": {
+      "status": "observed_not_verified",
+      "recorded_at_utc": "2026-09-02T05:32:38Z",
+      "scope": "仅对清单前 3 条候选做一次仓库外临时下载与审计预检；原始文档不进入 Git。",
+      "sample_root": "系统临时目录（出于可移植性与隐私不持久化路径）",
+      "network_used": true,
+      "manifest_modified_by_evaluator": false,
+      "raw_documents_in_git": false,
+      "temporary_files_cleanup": "blocked_by_desktop_safety_policy",
+      "selected": 12,
+      "audited": 3,
+      "pending_local_input": 9,
+      "hash_mismatch": 0,
+      "audit_error": 0,
+      "invalid": 0,
+      "interpretation": "3 个候选均能被下载并解析；本地 SHA-256 均不等于数据源行 id，因此不能把 id 当作文件哈希。该结果不代表文件级再分发许可已确认，也不代表已通过 PII 抽查。临时原始文件仍在系统 Temp，未进入 Git。",
+      "samples": [
+        {
+          "id": "0000439f0e09bad3cf0ff248690ae45e55120be8bdb42a8533f7e117bc4f7007",
+          "byte_size": 18038,
+          "local_sha256": "c9d69cb11f65d49948e7bef040a2d0b2067e0e1acb4af25354db6bdc5ffa73b0",
+          "id_matches_local_sha256": false,
+          "audit_summary": {"error": 0, "warning": 3, "info": 2, "findings": 5, "unsupported_objects": 0, "input_chars": 1500, "paragraphs": 25, "tables": 0, "cells": 0, "model_calls": 0, "elapsed_ms": 18},
+          "pii_spot_check": "not_started",
+          "file_level_redistribution": "UNVERIFIED"
+        },
+        {
+          "id": "0000a9d635d75ad4cc33de7e5f55ccfa77e9bcc2af5ddb60a522cb4253ca62ab",
+          "byte_size": 33219,
+          "local_sha256": "22f8e6ecd1e394c56de8b1719e74d72d74f2810d3fb1d1547f5c999f7064294b",
+          "id_matches_local_sha256": false,
+          "audit_summary": {"error": 0, "warning": 16, "info": 2, "findings": 18, "unsupported_objects": 0, "input_chars": 20242, "paragraphs": 82, "tables": 0, "cells": 0, "model_calls": 0, "elapsed_ms": 61},
+          "pii_spot_check": "not_started",
+          "file_level_redistribution": "UNVERIFIED"
+        },
+        {
+          "id": "000191ed2e82543361847868fcbde0c31954b3f2457da9238ebfe2509cb7788a",
+          "byte_size": 31033,
+          "local_sha256": "33e3f9c15c1a0300de76f3d96b5febc29fba3849a4e3f53585d8c0fc4d7685eb",
+          "id_matches_local_sha256": false,
+          "audit_summary": {"error": 0, "warning": 22, "info": 2, "findings": 24, "unsupported_objects": 3, "input_chars": 1658, "paragraphs": 32, "tables": 0, "cells": 0, "model_calls": 0, "elapsed_ms": 16},
+          "pii_spot_check": "not_started",
+          "file_level_redistribution": "UNVERIFIED"
+        }
+      ]
+    },
     "research_probes": {
       "status": "VERIFIED",
       "note": "以下 3 个样本是 docs/public-dataset-research.md 核验期间的下载探针（2026-09-02，仅存于系统临时目录，从未进入本仓库），不是选中的公开样例。研究文档只记录了 SHA-256 前缀，故此处仅转写前缀（complete=false），完整哈希未记录。",
