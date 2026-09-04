@@ -9,7 +9,7 @@
 - `.gitignore` 已排除 `data/raw/`、`data/external/`、`data/downloads/`、`data/cache/`。原始文档只能存放在
   这些被忽略目录或仓库外，任何情况下都不得把 .docx 原文、`extracted/*.txt` 全文提交进 Git。
 - manifest 中的 `local_path_outside_git` 字段只记录仓库外本地路径，作为取用索引，不代表文件进入仓库。
-- 本仓库当前有 12 条 `pending` 候选元数据记录（`candidates.records`），没有把任何原始文档提交到仓库；候选记录不等于已通过许可或 PII 审查。2026-09-02 曾对前 3 条候选做仓库外临时预检，结果和本地哈希记录在 manifest 的 `evidence.external_preflight` 中；临时原始文件仍在系统 Temp，未进入仓库，主动清理受桌面安全策略阻止。
+- 本仓库当前有 12 条 `pending` 候选元数据记录（`candidates.records`），没有把任何原始文档提交到仓库；候选记录不等于已通过许可或 PII 审查。2026-09-02 曾对前 3 条候选做仓库外临时预检；2026-09-04 已将 12 条候选全部下载到仓库外的 `E:\大学\专业实习\external-samples`，并记录下载报告和离线评估报告。原始文档仍不进入仓库。
 
 ## 2. 元数据/代码与文档版权边界
 
@@ -26,8 +26,8 @@
 
 ## 3. PII 抽查状态
 
-当前状态：`pii_spot_check.status = "not_started"`，12 条候选记录均为 `pending`，**本清单不含任何 PII 结论**。外部预检只验证了下载和解析链路，不改变这一状态。
-后续流程固定为：先用 `extracted/{id}.txt` 预览文本做人工抽查 → 通过后才下载原文 →
+当前状态：`pii_spot_check.status = "not_started"`，12 条候选记录均为 `pending`，**本清单不含任何 PII 通过结论**。全量下载和离线解析只验证工程链路，不改变这一状态。
+后续流程固定为：人工查看预览文本和已下载原文 → 检查正文、复杂文档部件和文件级许可 →
 在记录里填写抽查结论 → 全部满足后才允许提升为 `verified`。未抽查的记录一律保持 `pending`，
 不得填“通过”。
 
@@ -54,13 +54,13 @@ Get-FileHash -Algorithm SHA256 -LiteralPath "path\to\sample.docx"
 
 每条样例记录的状态枚举：
 
-- `pending`：已从元数据挑选、尚未完成下载/哈希/PII/许可核验（缺字段时保持该状态）。
+- `pending`：已从元数据挑选，但 PII、复杂部件或文件级许可核验尚未全部完成；即使下载和哈希字段已经齐备，也必须保持该状态。
 - `verified`：逐份许可与再分发核对完成、`downloaded_at_utc`/`byte_size`/`local_sha256` 齐备、
   人工 PII 抽查通过且不含可识别个人信息，才可提升。
 - `rejected`：抽查发现 PII、许可不满足或来源不可用，附原因。
 
 当前 12 条候选记录均为 `pending` 是**有意为之**：决策依据（选择标准、过滤条件、必填字段）都写在
-`selection_plan` 和 `per_record_required_fields` 里，已先定标准再选元数据；由于尚未完成下载、许可和 PII 核验，不能伪造“已通过”记录。
+`selection_plan` 和 `per_record_required_fields` 里，已先定标准再选元数据；虽然下载和哈希字段已经补齐，许可和 PII 核验尚未完成，不能伪造“已通过”记录。
 
 ## 6. 校验方式
 
@@ -72,4 +72,4 @@ python -m json.tool data\public-samples.manifest.json > $null
 
 本仓库是多子任务共享仓库：只追加/更新本 manifest 与 README，不修改或回滚其他任务的改动
 （根 README、SKILL.md、phase1-design.md、performance-baseline.md、benchmark_audit.py 等均属他人分区）。
-不下载、不提交任何原始文档；清单不同时保留同一条记录的两个互相矛盾的许可/哈希结论。
+不提交任何原始文档；清单不同时保留同一条记录的两个互相矛盾的许可/哈希结论。仓库外审查目录的文件不得因本地存在就被复制进 Git。

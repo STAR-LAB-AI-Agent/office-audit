@@ -7,7 +7,7 @@
   "evidence_basis": {
     "document": "docs/public-dataset-research.md",
     "document_date": "2026-09-02",
-    "method": "仅使用第一方来源（Hugging Face 官方卡片/API、GitHub 官方仓库文件/API、DocxCorp 官方站点/API）核验，并做了少量下载实测；不引用博客、搜索摘要或二手转述。本清单不包含任何从网络新下载的文档，也不包含对未核验事实的断言。"
+    "method": "仅使用第一方来源（Hugging Face 官方卡片/API、GitHub 官方仓库文件/API、DocxCorp 官方站点/API）核验，并记录仓库外下载实测；不引用博客、搜索摘要或二手转述。本清单只保存元数据和核验状态，不包含原始文档内容。"
   },
   "policy": {
     "raw_documents_in_git": false,
@@ -20,7 +20,7 @@
     },
     "sha256_policy": {
       "rule": "每个样例必须本地自算 SHA-256 并记录；不得把数据源行 id 当作完整性校验值。",
-      "reason": "VERIFIED（2026-09-02 实测）：从 docxcorp.us 下载的 3 个样本本地 SHA-256 均不等于各自行 id，与官方'id 即文件 SHA-256'声明不符。"
+      "reason": "VERIFIED（2026-09-04 实测）：从 docxcorp.us 下载的 12 个候选本地 SHA-256 均不等于各自行 id，与官方'id 即文件 SHA-256'声明不符。"
     }
   },
   "verification_labels": {
@@ -147,7 +147,7 @@
       "citation": "docx-corpus (2026), https://docxcorp.us；数据集页 https://huggingface.co/datasets/superdoc-dev/docx-corpus",
       "next_actions": [
         "按 selection_plan 从 HF parquet 挑选候选行（此阶段不下载）。",
-        "用 extracted/{id}.txt 预览文本做人工 PII 抽查，通过后才考虑下载原文。",
+        "用 extracted/{id}.txt 做人工 PII 预审；原始文件已下载到仓库外，但在许可证和正式 PII 核验完成前不得公开。",
         "下载到仓库外/被忽略目录，记录 downloaded_at_utc、字节数、本地自算 SHA-256。",
         "逐份核对来源站点再分发条款并记录；全部满足后才把记录标为 verified。"
       ]
@@ -267,7 +267,7 @@
     "status": "pending",
     "selected_at_utc": "2026-09-02T04:47:56Z",
     "selection_source": "Hugging Face datasets-server rows API；使用 2026-09-02 获取的 train 元数据，按 confidence>=0.8、100<=word_count<=5000、language in {en,zh} 且排除 type/topic 为 healthcare、forms、government 过滤。",
-    "note": "已选择 12 个候选元数据记录，但尚未下载、哈希、人工 PII 抽查或逐份核对文档再分发许可；全部保持 pending，不代表已通过审计或适合公开分发。",
+    "note": "已选择 12 个候选元数据记录；2026-09-04 已全部下载到仓库外并记录本地大小与 SHA-256，但尚未完成正式人工 PII 抽查或逐份核对文档再分发许可，全部保持 pending，不代表已通过审计或适合公开分发。",
     "records": [
       {
         "id": "0000439f0e09bad3cf0ff248690ae45e55120be8bdb42a8533f7e117bc4f7007",
@@ -280,17 +280,17 @@
         "confidence": 0.9823228716850281,
         "word_count": 232,
         "metadata_status": "VERIFIED",
-        "downloaded_at_utc": null,
-        "byte_size": null,
-        "local_sha256": null,
+        "downloaded_at_utc": "2026-09-04T03:00:32Z",
+        "byte_size": 18038,
+        "local_sha256": "c9d69cb11f65d49948e7bef040a2d0b2067e0e1acb4af25354db6bdc5ffa73b0",
         "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
         "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": null,
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/0000439f0e09bad3cf0ff248690ae45e55120be8bdb42a8533f7e117bc4f7007.docx",
         "status": "pending",
-        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+        "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
       {
         "id": "0000a9d635d75ad4cc33de7e5f55ccfa77e9bcc2af5ddb60a522cb4253ca62ab",
@@ -303,17 +303,17 @@
         "confidence": 0.8088721632957458,
         "word_count": 3101,
         "metadata_status": "VERIFIED",
-        "downloaded_at_utc": null,
-        "byte_size": null,
-        "local_sha256": null,
+        "downloaded_at_utc": "2026-09-04T03:00:34Z",
+        "byte_size": 33219,
+        "local_sha256": "22f8e6ecd1e394c56de8b1719e74d72d74f2810d3fb1d1547f5c999f7064294b",
         "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
         "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": null,
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/0000a9d635d75ad4cc33de7e5f55ccfa77e9bcc2af5ddb60a522cb4253ca62ab.docx",
         "status": "pending",
-        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+        "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
       {
         "id": "000191ed2e82543361847868fcbde0c31954b3f2457da9238ebfe2509cb7788a",
@@ -326,17 +326,17 @@
         "confidence": 0.9490006566047668,
         "word_count": 263,
         "metadata_status": "VERIFIED",
-        "downloaded_at_utc": null,
-        "byte_size": null,
-        "local_sha256": null,
+        "downloaded_at_utc": "2026-09-04T03:00:35Z",
+        "byte_size": 31033,
+        "local_sha256": "33e3f9c15c1a0300de76f3d96b5febc29fba3849a4e3f53585d8c0fc4d7685eb",
         "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
         "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": null,
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/000191ed2e82543361847868fcbde0c31954b3f2457da9238ebfe2509cb7788a.docx",
         "status": "pending",
-        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+        "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
       {
         "id": "0001ce58b20a6729690ff8178acb64d5dc5aae19faea05efdf904b5286d0f4b4",
@@ -349,17 +349,17 @@
         "confidence": 0.8418747782707214,
         "word_count": 302,
         "metadata_status": "VERIFIED",
-        "downloaded_at_utc": null,
-        "byte_size": null,
-        "local_sha256": null,
+        "downloaded_at_utc": "2026-09-04T03:00:37Z",
+        "byte_size": 54376,
+        "local_sha256": "281d09836306794383fbb65d42715e1333321f95a1cca34c76ee1e035adeb4e0",
         "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
         "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": null,
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/0001ce58b20a6729690ff8178acb64d5dc5aae19faea05efdf904b5286d0f4b4.docx",
         "status": "pending",
-        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+        "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
       {
         "id": "0003daa8cf8b58a2049c852db87db194c46324bc70b91c4824cf04f7fb5c0fa6",
@@ -372,17 +372,17 @@
         "confidence": 0.9118648767471313,
         "word_count": 520,
         "metadata_status": "VERIFIED",
-        "downloaded_at_utc": null,
-        "byte_size": null,
-        "local_sha256": null,
+        "downloaded_at_utc": "2026-09-04T03:00:39Z",
+        "byte_size": 23617,
+        "local_sha256": "9f14ae7cb776d7954e0af685719902ac7d642668b10ddc8d8269c91459f94c4a",
         "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
         "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": null,
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/0003daa8cf8b58a2049c852db87db194c46324bc70b91c4824cf04f7fb5c0fa6.docx",
         "status": "pending",
-        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+        "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
       {
         "id": "000407cd6c79442ca73c72003321fd71054f8782c4fe240053c9ac064efdb5b6",
@@ -395,17 +395,17 @@
         "confidence": 0.9363939166069031,
         "word_count": 278,
         "metadata_status": "VERIFIED",
-        "downloaded_at_utc": null,
-        "byte_size": null,
-        "local_sha256": null,
+        "downloaded_at_utc": "2026-09-04T03:00:40Z",
+        "byte_size": 367994,
+        "local_sha256": "61b9a19ac63ec5b9344a7dad5b01b0598b7b9872d537322e9e0c6adc0483ddb0",
         "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
         "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": null,
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/000407cd6c79442ca73c72003321fd71054f8782c4fe240053c9ac064efdb5b6.docx",
         "status": "pending",
-        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+        "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
       {
         "id": "000555ad3cc8f054f9e204131fe47bf96530b1159dca443b14ef83d1fcf051c0",
@@ -418,17 +418,17 @@
         "confidence": 0.9597741961479187,
         "word_count": 3091,
         "metadata_status": "VERIFIED",
-        "downloaded_at_utc": null,
-        "byte_size": null,
-        "local_sha256": null,
+        "downloaded_at_utc": "2026-09-04T03:00:42Z",
+        "byte_size": 25117,
+        "local_sha256": "2be095ac16a67b52d5aa2b8d9f4491131d822266bb2d22ccd79419e3cb59b10a",
         "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
         "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": null,
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/000555ad3cc8f054f9e204131fe47bf96530b1159dca443b14ef83d1fcf051c0.docx",
         "status": "pending",
-        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+        "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
       {
         "id": "000949a04e086caa49e35395dbfbf48dec55bde8d08a58ce4ae2c3d83007965d",
@@ -441,17 +441,17 @@
         "confidence": 0.9691352844238281,
         "word_count": 484,
         "metadata_status": "VERIFIED",
-        "downloaded_at_utc": null,
-        "byte_size": null,
-        "local_sha256": null,
+        "downloaded_at_utc": "2026-09-04T03:00:44Z",
+        "byte_size": 16317,
+        "local_sha256": "83ce52548766ab479587cf8549400627b33ff4a90fd362139154988fd4b8ebae",
         "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
         "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": null,
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/000949a04e086caa49e35395dbfbf48dec55bde8d08a58ce4ae2c3d83007965d.docx",
         "status": "pending",
-        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+        "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
       {
         "id": "0009d7670d7636e99900e829d18584b453f3a1dd4d7bcc2eb8169da6cc18014f",
@@ -464,17 +464,17 @@
         "confidence": 0.918117880821228,
         "word_count": 693,
         "metadata_status": "VERIFIED",
-        "downloaded_at_utc": null,
-        "byte_size": null,
-        "local_sha256": null,
+        "downloaded_at_utc": "2026-09-04T03:00:46Z",
+        "byte_size": 20741,
+        "local_sha256": "116056f1f6689a0551ac6cbea32ebb9a21bc3e65e4e3d771b2239aa73f71a0b3",
         "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
         "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": null,
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/0009d7670d7636e99900e829d18584b453f3a1dd4d7bcc2eb8169da6cc18014f.docx",
         "status": "pending",
-        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+        "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
       {
         "id": "0009e9db54323f44d57d185826448b6e7c8a58abd36901433179f977e6a513fc",
@@ -487,17 +487,17 @@
         "confidence": 0.9737238883972168,
         "word_count": 656,
         "metadata_status": "VERIFIED",
-        "downloaded_at_utc": null,
-        "byte_size": null,
-        "local_sha256": null,
+        "downloaded_at_utc": "2026-09-04T03:00:47Z",
+        "byte_size": 16992,
+        "local_sha256": "e124b6333ddcec4de088b5a4aa4654ff4e34d85813773fa0b928dfb018dd2906",
         "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
         "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": null,
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/0009e9db54323f44d57d185826448b6e7c8a58abd36901433179f977e6a513fc.docx",
         "status": "pending",
-        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+        "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
       {
         "id": "000aac6d4310d6f03a1250137aa4af40e8bcc07f316f67f61e93edbd2d495555",
@@ -510,17 +510,17 @@
         "confidence": 0.9662472605705261,
         "word_count": 587,
         "metadata_status": "VERIFIED",
-        "downloaded_at_utc": null,
-        "byte_size": null,
-        "local_sha256": null,
+        "downloaded_at_utc": "2026-09-04T03:00:49Z",
+        "byte_size": 11373,
+        "local_sha256": "676bf47530b804f103a35879919bad9f578e0cfc15455b77074ad6be56d10c9a",
         "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
         "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": null,
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/000aac6d4310d6f03a1250137aa4af40e8bcc07f316f67f61e93edbd2d495555.docx",
         "status": "pending",
-        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+        "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
       {
         "id": "000c2f182dad8bdde27a9275da7ad9f227a0f331b47c31da3a4d35a82b6056ff",
@@ -533,21 +533,40 @@
         "confidence": 0.9824823141098022,
         "word_count": 289,
         "metadata_status": "VERIFIED",
-        "downloaded_at_utc": null,
-        "byte_size": null,
-        "local_sha256": null,
+        "downloaded_at_utc": "2026-09-04T03:00:51Z",
+        "byte_size": 18310,
+        "local_sha256": "55a405345fc39829f3d938a0444363366be399d4d39707b470759ba4f865f5b5",
         "version_anchor": {"hf_commit": "86593bcc2041f2a134258574d7f368bedc694a02", "parquet_lfs_sha256": "4b01438bc3c56d1a7d652875fbc9782ca6b88a9b302be302d694fd814ac87b12"},
         "license_declaration": {"metadata": "ODC-BY 1.0", "metadata_status": "VERIFIED", "document": "原作者版权（官方声明）；文件级再分发许可未确认", "document_status": "VERIFIED", "file_level_redistribution_status": "UNVERIFIED"},
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": null,
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/000c2f182dad8bdde27a9275da7ad9f227a0f331b47c31da3a4d35a82b6056ff.docx",
         "status": "pending",
-        "next_action": "先预览 extracted 文本并人工抽查 PII，再逐份核对原始来源许可"
+        "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       }
     ]
   },
   "evidence": {
+    "full_external_download": {
+      "status": "observed_not_verified",
+      "downloaded_at_utc_range": ["2026-09-04T03:00:32Z", "2026-09-04T03:00:51Z"],
+      "recorded_at_utc": "2026-09-04T03:00:52Z",
+      "target_directory": "E:/大学/专业实习/external-samples",
+      "download_report_outside_git": "E:/大学/专业实习/external-samples/download-report.json",
+      "audit_report_outside_git": "E:/大学/专业实习/external-samples/audit-evaluation.json",
+      "downloaded": 12,
+      "valid_docx": 12,
+      "id_hash_mismatches": 12,
+      "audit_summary": {"selected": 12, "audited": 12, "pending_local_input": 0, "hash_mismatch": 0, "audit_error": 0, "invalid_input_or_metadata": 0},
+      "network_used_for_download": true,
+      "network_used_by_evaluator": false,
+      "manifest_modified_by_evaluator": false,
+      "raw_documents_in_git": false,
+      "license_status": "UNVERIFIED",
+      "formal_pii_status": "not_started",
+      "note": "下载和解析链路已完成；文件级许可证和正式人工 PII 审查未完成，12 条候选仍保持 pending。"
+    },
     "preliminary_text_review": {
       "status": "preliminary_only",
       "reviewed_at_utc": "2026-09-02T06:16:24Z",
@@ -641,8 +660,8 @@
   },
   "next_actions": [
     "已从 HF rows API 按 selection_plan 过滤挑选 12 个 pending 候选行；后续需固定 HF 快照并复核记录。",
-    "对候选行先用 extracted/{id}.txt 预览文本做人工 PII 抽查；通过后再下载原文。",
-    "下载原文到仓库外或 data/ 下被 gitignore 排除的目录；逐条补填 downloaded_at_utc、byte_size、local_sha256（自算）。",
+    "已对 12 条候选下载到仓库外；下一步用 extracted 文本和原始文档做完整人工 PII、复杂部件和许可证复核。",
+    "下载记录已补齐 downloaded_at_utc、byte_size、local_sha256 和仓库外路径；后续每次使用前仍需重新校验哈希。",
     "逐份核对来源站点再分发条款和许可声明并记录。",
     "全部条件满足后，把记录 status 提升为 verified；文档本体始终不入 Git。",
     "WordScape 维持 backup 状态：先解决 URL 列表再分发许可（UNVERIFIED）并验证原站可达性，再评估是否接入。",
