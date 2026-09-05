@@ -288,7 +288,7 @@
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": "E:/大学/专业实习/external-samples/0000439f0e09bad3cf0ff248690ae45e55120be8bdb42a8533f7e117bc4f7007.docx",
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/01.docx",
         "status": "pending",
         "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
@@ -311,7 +311,7 @@
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": "E:/大学/专业实习/external-samples/0000a9d635d75ad4cc33de7e5f55ccfa77e9bcc2af5ddb60a522cb4253ca62ab.docx",
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/02.docx",
         "status": "pending",
         "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
@@ -334,7 +334,7 @@
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": "E:/大学/专业实习/external-samples/000191ed2e82543361847868fcbde0c31954b3f2457da9238ebfe2509cb7788a.docx",
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/03.docx",
         "status": "pending",
         "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
@@ -357,7 +357,7 @@
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": "E:/大学/专业实习/external-samples/0001ce58b20a6729690ff8178acb64d5dc5aae19faea05efdf904b5286d0f4b4.docx",
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/04.docx",
         "status": "pending",
         "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
@@ -380,7 +380,7 @@
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": "E:/大学/专业实习/external-samples/0003daa8cf8b58a2049c852db87db194c46324bc70b91c4824cf04f7fb5c0fa6.docx",
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/05.docx",
         "status": "pending",
         "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
@@ -403,7 +403,7 @@
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": "E:/大学/专业实习/external-samples/000407cd6c79442ca73c72003321fd71054f8782c4fe240053c9ac064efdb5b6.docx",
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/06.docx",
         "status": "pending",
         "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
@@ -426,7 +426,7 @@
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": "E:/大学/专业实习/external-samples/000555ad3cc8f054f9e204131fe47bf96530b1159dca443b14ef83d1fcf051c0.docx",
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/07.docx",
         "status": "pending",
         "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
@@ -449,7 +449,7 @@
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": "E:/大学/专业实习/external-samples/000949a04e086caa49e35395dbfbf48dec55bde8d08a58ce4ae2c3d83007965d.docx",
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/08.docx",
         "status": "pending",
         "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
@@ -472,7 +472,7 @@
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": "E:/大学/专业实习/external-samples/0009d7670d7636e99900e829d18584b453f3a1dd4d7bcc2eb8169da6cc18014f.docx",
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/09.docx",
         "status": "pending",
         "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
@@ -495,7 +495,7 @@
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": "E:/大学/专业实习/external-samples/0009e9db54323f44d57d185826448b6e7c8a58abd36901433179f977e6a513fc.docx",
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/10.docx",
         "status": "pending",
         "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
@@ -518,7 +518,7 @@
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": "E:/大学/专业实习/external-samples/000aac6d4310d6f03a1250137aa4af40e8bcc07f316f67f61e93edbd2d495555.docx",
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/11.docx",
         "status": "pending",
         "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       },
@@ -541,7 +541,7 @@
         "redistribution_status": "UNVERIFIED",
         "pii_spot_check": {"status": "not_started", "result": null, "note": "已完成首轮预览筛查但未完成正式人工全文 PII 抽查，不能推断无 PII；详见 evidence.preliminary_text_review"},
         "citation": "superdoc-dev/docx-corpus（HF train 元数据，2026-09-02 快照），https://huggingface.co/datasets/superdoc-dev/docx-corpus",
-        "local_path_outside_git": "E:/大学/专业实习/external-samples/000c2f182dad8bdde27a9275da7ad9f227a0f331b47c31da3a4d35a82b6056ff.docx",
+        "local_path_outside_git": "E:/大学/专业实习/external-samples/12.docx",
         "status": "pending",
         "next_action": "审查已下载样例的全文、文档部件和来源条款，完成后再决定 pending、rejected 或 verified"
       }
