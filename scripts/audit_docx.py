@@ -556,7 +556,7 @@ def _paragraph_locator(
     context = paragraphs[index]
     location = context["location"]
     container = _paragraph_container_key(location)
-    locator: dict[str, Any] = {"label": _location_label(location)}
+    locator: dict[str, Any] = {}
     text = _preview(str(context["text"]))
     if text:
         locator["text"] = text
@@ -577,6 +577,48 @@ def _paragraph_locator(
         if nearby_text:
             locator["next_text"] = nearby_text
             break
+
+    part = str(context["part"])
+    is_top_level_body = part == "body" and "table_index" not in location
+    if text and is_top_level_body:
+        locator["label"] = f"正文中以“{text}”开头的段落"
+        return locator
+    if text:
+        locator["label"] = f"{_location_label(location)}（以“{text}”开头）"
+        return locator
+    if is_top_level_body:
+        start = index
+        while start > 0:
+            candidate = paragraphs[start - 1]
+            if _paragraph_container_key(candidate["location"]) != container:
+                break
+            if _compact_text(str(candidate["text"])):
+                break
+            start -= 1
+        end = index
+        while end + 1 < len(paragraphs):
+            candidate = paragraphs[end + 1]
+            if _paragraph_container_key(candidate["location"]) != container:
+                break
+            if _compact_text(str(candidate["text"])):
+                break
+            end += 1
+        ordinal = index - start + 1
+        total = end - start + 1
+        previous_text = locator.get("previous_text")
+        next_text = locator.get("next_text")
+        if previous_text and next_text:
+            anchor = f"“{previous_text}”之后、“{next_text}”之前"
+        elif previous_text:
+            anchor = f"“{previous_text}”之后"
+        elif next_text:
+            anchor = f"“{next_text}”之前"
+        else:
+            anchor = "无可见文字锚点处"
+        suffix = f"（连续{total}个）" if total > 1 else ""
+        locator["label"] = f"正文中{anchor}的第{ordinal}个空白段落{suffix}"
+        return locator
+    locator["label"] = _location_label(location)
     return locator
 
 

@@ -20,6 +20,7 @@ class AuditDocxTests(unittest.TestCase):
             document = Document()
             document.add_paragraph("上文定位文字")
             document.add_paragraph("")
+            document.add_paragraph("")
             document.add_paragraph("下文定位文字")
             document.add_paragraph("同类正文一")
             document.add_paragraph("同类正文二")
@@ -30,11 +31,20 @@ class AuditDocxTests(unittest.TestCase):
             result = audit_document(path, mode="fields_format")
             markdown = render_result(result, "markdown")
 
-            self.assertIn("位置：正文第2段", markdown)
+            self.assertIn(
+                "位置：正文中“上文定位文字”之后、“下文定位文字”之前的第1个空白段落（连续2个）",
+                markdown,
+            )
+            self.assertIn(
+                "位置：正文中“上文定位文字”之后、“下文定位文字”之前的第2个空白段落（连续2个）",
+                markdown,
+            )
             self.assertIn("前文：“上文定位文字”", markdown)
             self.assertIn("后文：“下文定位文字”", markdown)
+            self.assertIn("位置：正文中以“格式离群段落”开头的段落", markdown)
             self.assertIn("段落文字：“格式离群段落”", markdown)
             self.assertIn("格式差异：", markdown)
+            self.assertNotIn("- 位置：正文第", markdown)
 
     def test_structural_header_footer_blanks_are_not_reported_as_content_blanks(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
