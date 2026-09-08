@@ -198,6 +198,7 @@ class _Collector:
         severity: str,
         rule_id: str,
         location: Mapping[str, Any],
+        locator: Mapping[str, Any] | None = None,
         evidence: str,
         message: str,
         suggestion: str,
@@ -205,17 +206,18 @@ class _Collector:
         if severity not in SEVERITIES:
             severity = "warning"
         self._finding_number += 1
-        self.result["findings"].append(
-            {
-                "id": f"F-{self._finding_number:03d}",
-                "severity": severity,
-                "rule_id": rule_id,
-                "location": dict(location),
-                "evidence": evidence,
-                "message": message,
-                "suggestion": suggestion,
-            }
-        )
+        finding = {
+            "id": f"F-{self._finding_number:03d}",
+            "severity": severity,
+            "rule_id": rule_id,
+            "location": dict(location),
+            "evidence": evidence,
+            "message": message,
+            "suggestion": suggestion,
+        }
+        if locator:
+            finding["locator"] = dict(locator)
+        self.result["findings"].append(finding)
 
     def unsupported(
         self,
@@ -480,6 +482,8 @@ def _collect_content(doc: Any, result: dict[str, Any]) -> tuple[list[dict[str, A
     result["metrics"]["tables_seen"] = table_index[0]
     result["metrics"]["cells_seen"] = len(cells)
     result["metrics"]["input_chars_seen"] = sum(len(item["text"]) for item in paragraphs)
+    for index, context in enumerate(paragraphs):
+        context["locator"] = _paragraph_locator(paragraphs, index)
     return paragraphs, cells
 
 
@@ -509,6 +513,73 @@ def _preview(value: str, limit: int = 80) -> str:
     return text if len(text) <= limit else text[: limit - 1] + "…"
 
 
+def _location_label(location: Mapping[str, Any]) -> str:
+    part = str(location.get("part", "文档"))
+    paragraph_index = location.get("paragraph_index")
+    table_index = location.get("table_index")
+    if table_index is not None:
+        story = {"table": "正文", "header": "页眉", "footer": "页脚"}.get(part, part)
+        label = (
+            f"{story}第{int(table_index) + 1}个表格"
+            f"第{int(location.get('row_index', 0)) + 1}行"
+            f"第{int(location.get('cell_index', 0)) + 1}列"
+        )
+        if paragraph_index is not None:
+            label += f"内第{int(paragraph_index) + 1}段"
+        return label
+    if part == "body":
+        if paragraph_index is not None:
+            return f"正文第{int(paragraph_index) + 1}段"
+        return "正文"
+    if part in {"header", "footer"}:
+        story = "页眉" if part == "header" else "页脚"
+        variant = {
+            "default": "默认",
+            "first_page": "首页",
+            "even_page": "偶数页",
+        }.get(str(location.get("variant", "")), "")
+        section = int(location.get("section_index", 0)) + 1
+        label = f"第{section}节{variant}{story}"
+        if paragraph_index is not None:
+            label += f"第{int(paragraph_index) + 1}段"
+        return label
+    return part
+
+
+def _paragraph_container_key(location: Mapping[str, Any]) -> tuple[tuple[str, Any], ...]:
+    return tuple(sorted((key, value) for key, value in location.items() if key != "paragraph_index"))
+
+
+def _paragraph_locator(
+    paragraphs: Sequence[Mapping[str, Any]], index: int
+) -> dict[str, Any]:
+    context = paragraphs[index]
+    location = context["location"]
+    container = _paragraph_container_key(location)
+    locator: dict[str, Any] = {"label": _location_label(location)}
+    text = _preview(str(context["text"]))
+    if text:
+        locator["text"] = text
+
+    for nearby_index in range(index - 1, -1, -1):
+        nearby = paragraphs[nearby_index]
+        if _paragraph_container_key(nearby["location"]) != container:
+            continue
+        nearby_text = _preview(str(nearby["text"]))
+        if nearby_text:
+            locator["previous_text"] = nearby_text
+            break
+    for nearby_index in range(index + 1, len(paragraphs)):
+        nearby = paragraphs[nearby_index]
+        if _paragraph_container_key(nearby["location"]) != container:
+            continue
+        nearby_text = _preview(str(nearby["text"]))
+        if nearby_text:
+            locator["next_text"] = nearby_text
+            break
+    return locator
+
+
 def _length_value(value: Length | None) -> float | None:
     if value is None:
         return None
@@ -536,6 +607,42 @@ def _format_signature(paragraph: Any) -> tuple[Any, ...]:
         _length_value(getattr(fmt, "space_after", None)),
         fmt.line_spacing,
     )
+
+
+_FORMAT_FIELD_NAMES = (
+    "样式",
+    "字体",
+    "字号",
+    "加粗",
+    "斜体",
+    "对齐",
+    "左缩进",
+    "右缩进",
+    "首行缩进",
+    "段前间距",
+    "段后间距",
+    "行距",
+)
+
+
+def _format_value(value: Any) -> str:
+    if value is None:
+        return "继承样式/未显式设置"
+    if value is True:
+        return "是"
+    if value is False:
+        return "否"
+    return str(value)
+
+
+def _format_differences(current: Sequence[Any], dominant: Sequence[Any]) -> str:
+    differences = []
+    for name, current_value, dominant_value in zip(_FORMAT_FIELD_NAMES, current, dominant):
+        if current_value != dominant_value:
+            differences.append(
+                f"{name}：主导={_format_value(dominant_value)}，本段={_format_value(current_value)}"
+            )
+    return "；".join(differences) or "未识别到可展示的差异"
 
 
 def _rule_severity(rules: Mapping[str, Any], rule_id: str, default: str) -> str:
@@ -593,6 +700,7 @@ def _audit_structure(
                 severity=_rule_severity(rules, "structure.heading_level_jump", "warning"),
                 rule_id="structure.heading_level_jump",
                 location=context["location"],
+                locator=context.get("locator"),
                 evidence=f"前一标题层级为 {previous_level}，当前层级为 {level}",
                 message="标题层级存在跳级",
                 suggestion="检查是否缺少中间层级，或在规则配置中声明允许的层级关系",
@@ -636,21 +744,25 @@ def _audit_fields_and_format(
     placeholder_pattern = _placeholder_regex(rules)
     for context in paragraphs:
         text = str(context["text"])
-        if not _compact_text(text):
+        location = context["location"]
+        is_top_level_body = context["part"] == "body" and "table_index" not in location
+        if not _compact_text(text) and is_top_level_body:
             collector.finding(
                 severity=_rule_severity(rules, "fields.empty_paragraph", "warning"),
                 rule_id="fields.empty_paragraph",
-                location=context["location"],
-                evidence="段落不包含可见文字",
-                message="发现空段落",
-                suggestion="确认该段落是否为有意留白；如不是，请补充内容或删除空段落",
+                location=location,
+                locator=context.get("locator"),
+                evidence="该正文段落不包含可见文字；请结合前后文定位",
+                message="发现正文空白段落标记",
+                suggestion="在 Word 中开启“显示/隐藏编辑标记(¶)”核对；若只是有意留白可忽略，否则删除多余段落",
             )
-        match = placeholder_pattern.search(text)
+        match = placeholder_pattern.search(text) if "table_index" not in location else None
         if match:
             collector.finding(
                 severity=_rule_severity(rules, "fields.placeholder", "warning"),
                 rule_id="fields.placeholder",
-                location=context["location"],
+                location=location,
+                locator=context.get("locator"),
                 evidence=f"命中占位符“{_preview(match.group(0))}”",
                 message="发现可能未完成的占位内容",
                 suggestion="提交前替换占位符，或在规则配置中明确说明该占位符允许保留",
@@ -696,12 +808,15 @@ def _audit_fields_and_format(
         if dominant_count < 2:
             continue
         for context in group:
-            if _format_signature(context["paragraph"]) != dominant:
+            current = _format_signature(context["paragraph"])
+            if current != dominant:
+                differences = _format_differences(current, dominant)
                 collector.finding(
                     severity=_rule_severity(rules, "format.dominant_style_outlier", "warning"),
                     rule_id="format.dominant_style_outlier",
                     location=context["location"],
-                    evidence="该段落的基础格式偏离同类段落主导格式",
+                    locator=context.get("locator"),
+                    evidence=f"该段落的基础格式偏离同类段落主导格式。格式差异：{differences}",
                     message="发现同类段落的基础格式离群",
                     suggestion="对照同类段落检查字体、字号、对齐、缩进和间距；如有意不同，请通过规则说明",
                 )
@@ -901,11 +1016,30 @@ def render_result(result: Mapping[str, Any], format_name: str = "json") -> str:
     if not findings:
         lines.append("- 未发现规则问题。")
     for finding in findings:
+        location = finding.get("location", {})
+        locator = finding.get("locator", {})
+        human_location = (
+            locator.get("label") if isinstance(locator, Mapping) else None
+        ) or _location_label(location)
         lines.extend(
             [
                 f"### {finding.get('id', '')} [{finding.get('severity', '')}] {finding.get('message', '')}",
                 f"- 规则：{finding.get('rule_id', '')}",
-                f"- 位置：{_location_text(finding.get('location', {}))}",
+                f"- 位置：{human_location}",
+            ]
+        )
+        if isinstance(locator, Mapping) and locator.get("text"):
+            lines.append(f"- 段落文字：“{locator['text']}”")
+        nearby = []
+        if isinstance(locator, Mapping) and locator.get("previous_text"):
+            nearby.append(f"前文：“{locator['previous_text']}”")
+        if isinstance(locator, Mapping) and locator.get("next_text"):
+            nearby.append(f"后文：“{locator['next_text']}”")
+        if nearby:
+            lines.append(f"- 附近文字：{'；'.join(nearby)}")
+        lines.extend(
+            [
+                f"- 技术定位：{_location_text(location)}",
                 f"- 证据：{finding.get('evidence', '')}",
                 f"- 建议：{finding.get('suggestion', '')}",
                 "",
@@ -917,10 +1051,12 @@ def render_result(result: Mapping[str, Any], format_name: str = "json") -> str:
     if not unsupported:
         lines.append("- 未识别到基础范围之外的对象。")
     for item in unsupported:
+        location = item.get("location", {})
         lines.extend(
             [
                 f"### {item.get('id', '')} [{item.get('object_type', '')}]",
-                f"- 位置：{_location_text(item.get('location', {}))}",
+                f"- 位置：{_location_label(location)}",
+                f"- 技术定位：{_location_text(location)}",
                 f"- 数量：{item.get('count', 0)}",
                 f"- 原因：{item.get('reason', '')}",
                 f"- 影响：{item.get('impact', '')}",

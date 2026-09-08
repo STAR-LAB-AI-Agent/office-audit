@@ -14,6 +14,56 @@ from scripts.audit_docx import audit_document, classify_request, main, render_re
 
 
 class AuditDocxTests(unittest.TestCase):
+    def test_markdown_findings_include_human_readable_paragraph_context(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "location-context.docx"
+            document = Document()
+            document.add_paragraph("上文定位文字")
+            document.add_paragraph("")
+            document.add_paragraph("下文定位文字")
+            document.add_paragraph("同类正文一")
+            document.add_paragraph("同类正文二")
+            outlier = document.add_paragraph("格式离群段落")
+            outlier.runs[0].bold = True
+            document.save(path)
+
+            result = audit_document(path, mode="fields_format")
+            markdown = render_result(result, "markdown")
+
+            self.assertIn("位置：正文第2段", markdown)
+            self.assertIn("前文：“上文定位文字”", markdown)
+            self.assertIn("后文：“下文定位文字”", markdown)
+            self.assertIn("段落文字：“格式离群段落”", markdown)
+            self.assertIn("格式差异：", markdown)
+
+    def test_structural_header_footer_blanks_are_not_reported_as_content_blanks(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "structural-header-footer.docx"
+            document = Document()
+            document.add_paragraph("正文")
+            section = document.sections[0]
+            section.different_first_page_header_footer = True
+            for story in (
+                section.header,
+                section.first_page_header,
+                section.even_page_header,
+                section.footer,
+                section.first_page_footer,
+                section.even_page_footer,
+            ):
+                _ = story.paragraphs[0]
+            document.save(path)
+
+            result = audit_document(path, mode="fields_format")
+            structural_blanks = [
+                finding
+                for finding in result["findings"]
+                if finding["rule_id"] == "fields.empty_paragraph"
+                and finding["location"].get("part") in {"header", "footer"}
+            ]
+
+            self.assertEqual([], structural_blanks)
+
     def _write_sample(self, directory: Path, *, with_drawing: bool = False) -> Path:
         path = directory / "sample.docx"
         document = Document()
