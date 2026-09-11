@@ -1,6 +1,6 @@
 # AI Office 文档审计
 
-这是“智能体开发实战”课程实习的 AI Office 文档审计 Skill。项目对应课程任务书中的 `#03 AI Office 文档审计`，当前已完成可独立运行的 `.docx` 只读审计 CLI、离线自然语言意图路由、性能基线和公开数据元数据清单；文档级样例核验与最终交付材料仍在推进。
+这是“智能体开发实战”课程实习的 AI Office 文档审计 Skill。项目对应课程任务书中的 `#03 AI Office 文档审计`，当前已完成可独立运行的 `.docx` 只读审计 CLI、离线自然语言意图路由、性能基线和公开数据元数据清单。项目采用“单一审计内核 + 多宿主 Skill 入口”，不绑定 Codex、Nanobot 或其他某一种智能体。
 
 ## 项目定位
 
@@ -25,9 +25,21 @@
 
 当前自然语言层采用透明的关键词路由，不联网、不调用模型；模型适配器可以作为后续增强，但不能绕过只读和确认边界。核心脚本可独立运行，并提供输入路径、自然语言请求、审计模式、必需章节、规则配置和输出格式等参数。
 
+## 通用 Skill 结构
+
+```text
+SKILL.md                              # 通用/Codex Skill 入口
+agents/openai.yaml                    # Codex 展示与默认提示
+skills/office-audit/SKILL.md          # Nanobot 工作区扫描入口
+skills/office-audit/scripts/run_audit.py  # 跨宿主薄启动器
+scripts/audit_docx.py                 # 唯一审计内核
+```
+
+各入口共享同一个审计器和结果协议，不维护多套规则。Nanobot 将本仓库作为 workspace 时会发现 `skills/office-audit/`；Codex 可将仓库根目录安装/链接为名为 `office-audit` 的 Skill。Claude Code、Antigravity 等支持目录型 Skill 的宿主也可映射同一仓库。具体路径和已验证状态见 [`docs/runtime-compatibility.md`](docs/runtime-compatibility.md)，课程环境的操作步骤见 [`docs/nanobot-test-guide.md`](docs/nanobot-test-guide.md)。
+
 ## 已实现的 CLI
 
-当前已完成确定性 `.docx` 审计 CLI、结构化结果模型、基础规则、未审计对象逐项告警、独立报告输出、离线自然语言路由、脱敏 JSONL 日志、性能基线和 12 个回归测试。公开数据研究已形成第一方来源核验文档，并在 `data/public-samples.manifest.json` 中登记 12 条 `pending` 候选；文档级许可/PII 核验和最终交付材料仍在推进。
+当前已完成确定性 `.docx` 审计 CLI、结构化结果模型、基础规则、未审计对象逐项告警、独立报告输出、离线自然语言路由、脱敏 JSONL 日志和性能基线。公开数据研究已形成第一方来源核验文档，并在 `data/public-samples.manifest.json` 中登记 12 条候选；原始文档因许可和隐私边界不进入代码仓库。
 
 安装依赖：
 
@@ -117,7 +129,7 @@ python scripts\demo_audit.py --output-dir outputs\demo --force
 python -m unittest discover -s tests -v
 ```
 
-当前回归集包含 10 个用例，并验证输入文档字节在审计前后保持不变。
+回归集覆盖审计规则、路径安全、输入文档字节不变和通用 Skill 布局；具体用例数以命令实际输出为准。
 
 可用临时可控文档进行本地性能/压缩对照（不会保存测试文档）：
 
@@ -129,4 +141,4 @@ python scripts/benchmark_audit.py --sizes 50,200,800 --repeats 3
 
 ## 本地开发
 
-当前开发使用 Python 3.10–3.12 和 `python-docx`。课程要求的 GitHub 开源交付将在最终验收、清理敏感内容并确认无密钥后再创建或公开远程仓库；本地仓库是当前唯一提交边界。
+当前开发使用 Python 3.10–3.12 和 `python-docx`。公开提交前仍需完成 Nanobot 实机记录、许可证确认、敏感内容与 Git 历史复核。

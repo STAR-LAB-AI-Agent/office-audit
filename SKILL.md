@@ -1,6 +1,6 @@
 ---
-name: ai-office-document-audit-skill
-description: "Use this skill when a user asks to audit a general Word document, especially a .docx, for heading structure, missing required sections, empty fields, placeholders, or basic formatting consistency. The skill is read-only: it produces structured findings and explicit per-object warnings for content it cannot audit, and it never silently treats one document template as a universal standard."
+name: office-audit
+description: "Audit general Word .docx documents for heading structure, missing user-defined sections, empty fields, placeholders, basic formatting consistency, and unsupported content. Use for read-only document quality inspection in Codex or another Skill-compatible agent; do not assume a fixed document template or modify the source file."
 ---
 
 # AI Office 文档审计
@@ -32,7 +32,9 @@ description: "Use this skill when a user asks to audit a general Word document, 
 
 当前规则不包含专门的 PII 检测；不得把质量审计结果解释为个人信息检查结论。若用户要求 PII 检测，应说明能力缺口，不能把人工预览写成脚本检测结果。
 
-Skill 面向通用 .docx 文档质量检查，通过 SKILL.md 和独立 Python CLI 提供能力。宿主负责理解自然语言、组织参数和解释结果；运行路径相对于本 Skill 目录解析。nanobot 不是依赖。宿主兼容性必须经实际调用验证，不得仅因脚本能运行就宣称 Codex、Claude Code 等均已通过端到端验收。
+Skill 面向通用 `.docx` 文档质量检查，通过 `SKILL.md` 和独立 Python CLI 提供能力。宿主负责理解自然语言、组织参数和解释结果，核心审计器不依赖某一种智能体或在线模型。仓库根目录是 Codex 等通用 Skill 宿主的入口；`skills/office-audit/` 是 Nanobot 等按工作区扫描 Skill 的兼容入口，两者调用同一个 `scripts/audit_docx.py`，不得复制或分叉审计规则。
+
+运行前先定位包含 `scripts/audit_docx.py` 的项目根目录，不要假定智能体当前工作目录。可以直接从项目根目录调用核心脚本，也可以调用兼容入口 `skills/office-audit/scripts/run_audit.py`。宿主兼容性必须经实际调用验证，不得仅因脚本能运行就宣称已经通过端到端验收。
 
 1. 识别用户意图：`full`（完整审计）、`structure`（结构审计）或 `fields_format`（字段与格式审计）。
 2. 校验输入路径、扩展名、规则和输出路径；输出不能覆盖输入文档。
@@ -65,6 +67,12 @@ python scripts/audit_docx.py --input "report.docx" --mode structure --required-s
 python scripts/audit_docx.py --input "report.docx" --request "检查空字段、占位符和格式" --format json
 ```
 
+跨宿主的稳定入口：
+
+```powershell
+python skills/office-audit/scripts/run_audit.py --input "report.docx" --mode full --format json --output "reports\audit.json"
+```
+
 需要评估公开数据候选时，使用 `scripts/evaluate_manifest.py` 读取 `data/public-samples.manifest.json` 和仓库外的本地样例。该入口默认不联网、不下载、不修改 manifest 或原文，只输出每条候选的本地状态和审计统计；没有本地文件时必须保留 `pending_local_input`。
 
 ```powershell
@@ -80,7 +88,7 @@ python scripts/evaluate_manifest.py `
 
 ## 当前状态
 
-Phase2–4 已完成确定性 `.docx` 审计 CLI、结构化结果模型、基础规则、未审计对象逐项告警、独立报告输出、脱敏 JSONL 日志、离线自然语言意图路由、性能基线、公开数据研究、仅含元数据的 manifest 和 12 个回归测试。当前有 12 条 `pending` 候选；文档级许可/PII 核验、正式样例审计、实际视频录制和最终开源检查仍在后续阶段。
+已完成确定性 `.docx` 审计 CLI、结构化结果模型、基础规则、未审计对象逐项告警、独立报告输出、脱敏 JSONL 日志、离线自然语言意图路由、性能基线、公开数据研究和仅含元数据的 manifest。当前有 12 条公开数据候选；原始文档不随代码发布。最新测试数量和宿主验收状态以测试命令与 `docs/runtime-compatibility.md` 为准。
 
 使用 `scripts/benchmark_audit.py` 可在临时生成的可控文档上测量本地耗时和摘要压缩代理。该代理不是模型 token 统计；当前实现的 `model_calls` 应为 0。
 

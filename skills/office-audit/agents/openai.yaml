@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Office 文档审计"
+  short_description: "跨智能体的只读 Word 文档结构、字段与格式审计"
+  default_prompt: "使用 $office-audit 只读审计指定的 Word .docx 文档，并输出带明确位置和未审计对象说明的报告"
