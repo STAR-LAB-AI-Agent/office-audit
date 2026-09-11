@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | Codex | 将仓库根目录安装或链接到 Codex Skills 目录，名称保持 `office-audit` | 2026-09-11 使用 Codex CLI 0.153.4 实测通过 |
 | Nanobot | 将本仓库作为 workspace；Nanobot 扫描 `skills/office-audit/SKILL.md` | 由课程统一 Nanobot 环境实测 |
-| Claude Code | 将同一 Skill 映射到项目 `.claude/skills/office-audit/` | 尚未实测，不宣称通过 |
+| Claude Code | 直接打开本仓库；项目入口位于 `.claude/skills/office-audit/SKILL.md` | 入口已配置，待 Claude Code 实机调用 |
 | Antigravity | 将同一 Skill 映射到项目 `.agents/skills/office-audit/` | 尚未实测，不宣称通过 |
 
 “脚本测试通过”“Skill 结构可发现”和“宿主真实调用通过”是三项不同证据。某个宿主只有在它确实识别 Skill、调用审计器、生成报告并保持原文不变后，才可标为实测通过。

@@ -33,6 +33,10 @@ class SkillLayoutTests(unittest.TestCase):
         skill_dir = ROOT / "skills" / "office-audit"
         self.assertEqual(skill_dir.name, frontmatter_name(skill_dir / "SKILL.md"))
 
+    def test_claude_code_project_entry_uses_same_skill_name(self) -> None:
+        claude_skill = ROOT / ".claude" / "skills" / "office-audit" / "SKILL.md"
+        self.assertEqual(frontmatter_name(claude_skill), "office-audit")
+
     def test_portable_launcher_exposes_core_cli(self) -> None:
         launcher = ROOT / "skills" / "office-audit" / "scripts" / "run_audit.py"
         result = subprocess.run(

@@ -31,11 +31,12 @@
 SKILL.md                              # 通用/Codex Skill 入口
 agents/openai.yaml                    # Codex 展示与默认提示
 skills/office-audit/SKILL.md          # Nanobot 工作区扫描入口
+.claude/skills/office-audit/SKILL.md  # Claude Code 项目入口
 skills/office-audit/scripts/run_audit.py  # 跨宿主薄启动器
 scripts/audit_docx.py                 # 唯一审计内核
 ```
 
-各入口共享同一个审计器和结果协议，不维护多套规则。Nanobot 将本仓库作为 workspace 时会发现 `skills/office-audit/`；Codex 可将仓库根目录安装/链接为名为 `office-audit` 的 Skill。Claude Code、Antigravity 等支持目录型 Skill 的宿主也可映射同一仓库。具体路径和已验证状态见 [`docs/runtime-compatibility.md`](docs/runtime-compatibility.md)，课程环境的操作步骤见 [`docs/nanobot-test-guide.md`](docs/nanobot-test-guide.md)。
+各入口共享同一个审计器和结果协议，不维护多套规则。Nanobot 将本仓库作为 workspace 时会发现 `skills/office-audit/`；Claude Code 打开同一仓库时会发现 `.claude/skills/office-audit/`；Codex 可将仓库根目录安装/链接为名为 `office-audit` 的 Skill。具体路径和已验证状态见 [`docs/runtime-compatibility.md`](docs/runtime-compatibility.md)，课程环境的操作步骤见 [`docs/nanobot-test-guide.md`](docs/nanobot-test-guide.md)。
 
 ## 已实现的 CLI
 
