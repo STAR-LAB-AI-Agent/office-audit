@@ -88,7 +88,7 @@ python scripts/evaluate_manifest.py `
 
 ## 当前状态
 
-已完成确定性 `.docx` 审计 CLI、结构化结果模型、基础规则、未审计对象逐项告警、独立报告输出、脱敏 JSONL 日志、离线自然语言意图路由、性能基线、公开数据研究和仅含元数据的 manifest。当前有 12 条公开数据候选；原始文档不随代码发布。最新测试数量和宿主验收状态以测试命令与 `docs/runtime-compatibility.md` 为准。
+已完成确定性 `.docx` 审计 CLI、结构化结果模型、基础规则、未审计对象逐项告警、独立报告输出、脱敏 JSONL 日志、离线自然语言意图路由、性能基线、公开数据研究和仅含元数据的 manifest。原始公开候选文档不随代码发布。最新测试、宿主验收、候选数据与发布边界统一以 `docs/validation-status.md` 为准，宿主执行细节见 `docs/runtime-compatibility.md`。
 
 使用 `scripts/benchmark_audit.py` 可在临时生成的可控文档上测量本地耗时和摘要压缩代理。该代理不是模型 token 统计；当前实现的 `model_calls` 应为 0。
 

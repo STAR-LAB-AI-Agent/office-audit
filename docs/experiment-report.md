@@ -1,6 +1,6 @@
 # AI Office 文档审计：阶段性实验报告
 
-> 状态：阶段性草稿（2026-09-04），用于持续验收和后续正式报告整理。文中明确区分已完成工作、实验事实和未完成事项，不把候选数据当作已通过样例。
+> 状态：阶段性草稿（更新至 2026-09-11），用于持续验收和后续正式报告整理，不代表最终课程报告已经完成。当前数量和完成状态见[当前验收状态](validation-status.md)，本文保留实验过程与边界说明。
 
 ## 1. 项目概况
 
@@ -9,6 +9,7 @@
 - 目标对象：课程报告、通知、会议纪要、制度文件、项目说明、申请材料和模板等通用 Word 文档
 - 第一版核心格式：`.docx`
 - 运行原则：离线、只读、可追溯；不自动修改原文，不执行文档中的宏、脚本或指令文字
+- 仓库状态：当前分支为 `main`，`origin` 指向 <https://github.com/STAR-LAB-AI-Agent/office-audit.git>，根目录已有 MIT `LICENSE`
 
 ## 2. 要解决的问题
 
@@ -49,14 +50,14 @@
 
 ## 6. 验证证据
 
-使用课程绑定 Python 3.12.13（`python-docx` 1.2.0）完成：
+2026-09-11 在当前工作区使用 Python 3.9.0、实际导入的 `python-docx` 1.2.0 执行；`requirements.txt` 只约束 `python-docx>=1.2,<2`，并未锁定安装版本：
 
 ```powershell
 python -m py_compile scripts\audit_docx.py scripts\benchmark_audit.py scripts\evaluate_manifest.py tests\test_audit_docx.py
 python -m unittest discover -s tests -v
 ```
 
-结果：10 个回归用例全部通过；输入文档字节在审计前后保持不变。使用 Skill 官方校验脚本得到 `Skill is valid!`。manifest 结构检查得到 12 条候选、每条必填字段齐全、`raw_docx=0`。官方 rows API 回读后，12 条记录的 ID、URL、类型、主题、语言、词数和置信度全部与清单一致。
+结果：16/16 个 unittest 全部通过；输入文档字节不变等安全约束由相应回归用例覆盖。受控缺陷样例为 5/5 通过。既有记录中的 Skill 官方校验结果为 `Skill is valid!`，本轮未重新执行该校验。manifest 当前包含 12 条候选，状态均为 `pending`、PII 均为 `not_started`、文件级再分发均为 `UNVERIFIED`。宿主记录显示 Codex、Nanobot 和 Claude Code 已完成端到端实测，Antigravity 尚未实测。完整证据边界见[当前验收状态](validation-status.md)。
 
 性能基线见[性能记录](performance-baseline.md)。50、200、800 段受控文档的摘要字符比例分别为 6.17%、1.55%、0.38%，当前 `model_calls=0`；两次同日运行的墙钟耗时有明显波动，因此这些数据只说明“先本地解析和压缩”的方向，不是跨机器性能保证，也不是模型 token 统计。
 
@@ -74,7 +75,7 @@ python -m unittest discover -s tests -v
 
 演示脚本 `scripts/demo_audit.py` 可生成不含个人信息的临时缺陷文档，复现标题跳级、占位符、空单元格、格式离群和未审计绘图对象，并输出 JSON/Markdown 结果。该临时文档不进入仓库。
 
-### 6.2 受控缺陷标签验收
+### 6.3 受控缺陷标签验收
 
 scripts/evaluate_controlled_cases.py 根据 fixtures/controlled-cases.json 生成 5 类无个人信息的临时文档：正常基线、标题层级跳级、用户指定章节缺失、空字段/占位符/格式离群，以及未审计绘图对象。脚本执行后只保留每个样例的命中规则、摘要和通过状态，不保留 .docx 变体。
 
@@ -88,7 +89,7 @@ scripts/evaluate_controlled_cases.py 根据 fixtures/controlled-cases.json 生�
 - 尚未接入在线模型；当前低 token 结论只基于确定性摘要字符代理。
 - `.doc`、扫描 PDF、图片文字、文本框内部语义、嵌入式 Office 对象、批注内容和修订语义不在第一版直接审计范围。
 - 当前回归样例包含 5 个带期望标签的临时受控文档；真实公开样例已完成 12/12 的仓库外工程下载与离线解析评估，但因 PII、复杂部件和文件级许可尚未核验，不能称为正式公开数据集评估。
-- GitHub 远程仓库尚未创建或公开；当前本地仓库是唯一提交边界。
+- GitHub `origin` 已配置为 <https://github.com/STAR-LAB-AI-Agent/office-audit.git>；本地配置不证明最终公开交付、仓库可见性或 Git 历史检查已经完成。
 
 ## 8. 后续计划
 

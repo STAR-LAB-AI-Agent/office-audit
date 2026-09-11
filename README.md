@@ -6,6 +6,8 @@ AI Office 文档审计是“智能体开发实战”课程中的 Word 文档审�
 
 项目可以直接当 Python CLI 使用，也可以接入 Codex、Nanobot 和 Claude Code。三个入口共用同一套审计代码，避免不同智能体跑出不同规则。
 
+截至 2026-09-11，当前分支为 `main`，已配置 GitHub `origin` <https://github.com/STAR-LAB-AI-Agent/office-audit.git>，仓库根目录已提供 MIT `LICENSE`。测试、宿主兼容、公开候选和发布边界汇总在 [`docs/validation-status.md`](docs/validation-status.md)，其他报告保留实验过程和分析；最终公开交付尚未完成。
+
 ## 能检查什么
 
 目前有三种模式：
@@ -25,6 +27,14 @@ AI Office 文档审计是“智能体开发实战”课程中的 Word 文档审�
 ```powershell
 python -m pip install -r requirements.txt
 ```
+
+`requirements.txt` 当前只声明一项直接第三方运行依赖：
+
+| 依赖 | 版本约束 | 许可证 | 官方来源 | 在项目中的用途 |
+| --- | --- | --- | --- | --- |
+| `python-docx` | `>=1.2,<2` | MIT | [python-docx 官方仓库](https://github.com/python-openxml/python-docx) | 读取并遍历 `.docx` 的正文、表格、嵌套表格、页眉页脚、样式和相关 OOXML 结构 |
+
+版本范围直接来自 [`requirements.txt`](requirements.txt)，表示兼容区间，并未锁定某个精确安装版本。许可证和来源与当前安装包元数据及项目内[开源代码报告](docs/open-source-code-report.md)的记录一致；上游许可证原文见 [python-docx LICENSE](https://github.com/python-openxml/python-docx/blob/master/LICENSE)。当前环境的实际安装版本记录在[验收状态](docs/validation-status.md)。
 
 跑一次完整审计：
 
@@ -96,13 +106,13 @@ JSON 是主输出格式，另外提供 Markdown 和终端摘要。每条问题�
 
 ## 测试
 
-Codex、Nanobot 和 Claude Code 的兼容性测试已经完成。单元测试不需要网络或模型密钥：
+Codex、Nanobot 和 Claude Code 已有端到端验收记录；Antigravity 尚未验证。证据边界见 [`docs/validation-status.md`](docs/validation-status.md) 和 [`docs/runtime-compatibility.md`](docs/runtime-compatibility.md)。单元测试不需要网络或模型密钥：
 
 ```powershell
 python -m unittest discover -s tests -v
 ```
 
-目前共有 16 项测试，覆盖三种模式、自然语言路由、自定义规则、报告隔离、原文保护、未审计对象和多宿主 Skill 目录。
+2026-09-11 当前验收为 16/16 个 unittest 通过，覆盖三种模式、自然语言路由、自定义规则、报告隔离、原文保护、未审计对象和多宿主 Skill 目录；后续数量与结果以状态页为准。
 
 受控缺陷样例会在临时目录生成，不会留下测试文档：
 
@@ -110,7 +120,7 @@ python -m unittest discover -s tests -v
 python scripts/evaluate_controlled_cases.py --format terminal
 ```
 
-当前 5 组受控样例全部通过。性能测试可以这样运行：
+2026-09-11 当前验收为 5/5 组受控样例通过。该结果只覆盖合成的确定性规则样例，不替代公开候选的 PII 和再分发核验。性能测试可以这样运行：
 
 ```powershell
 python scripts/benchmark_audit.py --sizes 50,200,800 --repeats 3
@@ -147,6 +157,7 @@ python scripts/demo_audit.py --output-dir outputs/demo --force
 
 ## 其他文档
 
+- [`docs/validation-status.md`](docs/validation-status.md)：当前验收事实与证据边界；
 - [`docs/controlled-cases.md`](docs/controlled-cases.md)：受控样例和期望标签；
 - [`docs/performance-baseline.md`](docs/performance-baseline.md)：性能基线；
 - [`docs/demo-script.md`](docs/demo-script.md)：演示录制步骤；
