@@ -9,8 +9,8 @@
 | 宿主 | 接入方式 | 验收状态 |
 | --- | --- | --- |
 | Codex | 将仓库根目录安装或链接到 Codex Skills 目录，名称保持 `office-audit` | 2026-09-11 使用 Codex CLI 0.153.4 实测通过 |
-| Nanobot | 将本仓库作为 workspace；Nanobot 扫描 `skills/office-audit/SKILL.md` | 由课程统一 Nanobot 环境实测 |
-| Claude Code | 直接打开本仓库；项目入口位于 `.claude/skills/office-audit/SKILL.md` | 入口已配置，待 Claude Code 实机调用 |
+| Nanobot | 将本仓库作为 workspace；Nanobot 扫描 `skills/office-audit/SKILL.md` | 2026-09-11 课程环境实测通过 |
+| Claude Code | 直接打开本仓库；项目入口位于 `.claude/skills/office-audit/SKILL.md` | 2026-09-11 实测通过 |
 | Antigravity | 将同一 Skill 映射到项目 `.agents/skills/office-audit/` | 尚未实测，不宣称通过 |
 
 “脚本测试通过”“Skill 结构可发现”和“宿主真实调用通过”是三项不同证据。某个宿主只有在它确实识别 Skill、调用审计器、生成报告并保持原文不变后，才可标为实测通过。
@@ -38,3 +38,17 @@
 | 报告路径与输入路径相同 | `full` | 2 | 按预期拒绝，错误码 `unsafe_output_path` |
 
 输入文档在测试前后的 SHA-256 均为 `9A59A039FA0AACACF4AE502AE69696A38868853238D5D7E7D9F2B2847719B667`。测试输出位于被 Git 忽略的 `outputs/codex-runtime-test/`，不作为发布数据集提交。
+
+## Nanobot 与 Claude Code 实测记录（2026-09-11）
+
+用户分别在 Nanobot 和 Claude Code 中调用 `office-audit`。两种宿主均生成3份可解析 JSON 报告，实际模式和统计完全一致：
+
+| 用例 | 实际模式 | Nanobot | Claude Code |
+| --- | --- | --- | --- |
+| 合成演示文档完整审计 | `full` | 0 error，5 findings，1个未审计对象 | 0 error，5 findings，1个未审计对象 |
+| 真实报告结构审计 | `structure` | 0 error，1 finding，4个未审计对象 | 0 error，1 finding，4个未审计对象 |
+| 真实报告字段与格式审计 | `fields_format` | 0 error，23 findings，11个未审计对象 | 0 error，23 findings，11个未审计对象 |
+
+两份真实报告测试副本与仓库外原文件的 SHA-256 一致。运行产物分别保存在被 Git 忽略的 `outputs/nanobot-test/` 和 `outputs/claude-test/`，原始个人文档保存在被 Git 忽略的 `data/external/personal-reports/`，均不进入公开仓库。
+
+这组结果证明三种宿主能够发现并执行统一审计链路，但不等于所有规则均达到理想准确率。真实长文档回归仍显示格式离群规则偏敏感，需要结合页面视觉复核继续降低误报。
