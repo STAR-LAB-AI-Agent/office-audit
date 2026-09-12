@@ -504,6 +504,50 @@ def _compact_text(value: str) -> str:
     return re.sub(r"\s+", " ", value).strip()
 
 
+def _content_carrier(paragraph: Any) -> bool:
+    """Text-empty paragraphs may still carry objects or layout instructions."""
+    return any(_local_name(e.tag) in {
+        "drawing", "pict", "object", "oMath", "oMathPara", "br", "sectPr",
+        "fldChar", "instrText", "sym", "txbxContent", "ins", "del",
+        "pageBreakBefore",
+    } for e in paragraph._p.iter())
+
+
+def _title_candidate(context: Mapping[str, Any]) -> bool:
+    p = context["paragraph"]
+    text = _compact_text(context["text"])
+    if not text or context["part"] != "body":
+        return False
+    if _style_name(p).casefold() in {"title", "标题", "subtitle", "副标题"}:
+        return True
+    # Conservative opening-title hint; not proof of a chapter or rendered title.
+    runs = [r for r in p.runs if r.text.strip()]
+    return (context["location"].get("paragraph_index", 99) < 3
+            and len(text) <= 80 and p.alignment == 1
+            and bool(runs) and all(r.bold is True for r in runs))
+
+
+def _paragraph_role(context: Mapping[str, Any]) -> str:
+    p = context["paragraph"]
+    style = _style_name(p).casefold()
+    text = _compact_text(context["text"])
+    if _heading_level(p) is not None:
+        return "heading"
+    if _title_candidate(context):
+        return "title_candidate"
+    if any(_local_name(e.tag) in {"oMath", "oMathPara"} for e in p._p.iter()):
+        return "equation"
+    if "caption" in style or "题注" in style or re.match(r"^(?:图|表|Figure|Fig\.|Table)\s*\d+", text, re.I):
+        return "caption"
+    if "quote" in style or "引用" in style:
+        return "quote"
+    if "bibliography" in style or "参考文献" in style or re.match(r"^\[\d+\]\s*\S", text):
+        return "reference"
+    if "list" in style or "列表" in style or any(_local_name(e.tag) == "numPr" for e in p._p.iter()):
+        return "list"
+    return "body"
+
+
 def _normalized_text(value: str) -> str:
     return re.sub(r"\s+", "", value).casefold()
 
@@ -728,10 +772,19 @@ def _audit_structure(
             severity=_rule_severity(rules, "structure.no_headings", "info"),
             rule_id="structure.no_headings",
             location={"part": "body"},
-            evidence="未识别到 Heading/标题样式段落",
+            evidence="未识别到 Heading/标题层级样式；这不表示页面上没有标题",
             message="文档中未识别到可用于结构审计的标题样式",
             suggestion="如果文档确实有章节，请使用 Word 标题样式；否则提供自定义结构规则",
         )
+        for context in paragraphs:
+            if _title_candidate(context):
+                collector.finding(
+                    severity="info", rule_id="structure.title_candidate",
+                    location=context["location"], locator=context.get("locator"),
+                    evidence="由 Title/Subtitle 样式或开头短段居中加粗识别；尚未渲染确认",
+                    message="发现标题候选，不能据此确定章节层级",
+                    suggestion="核对页面标题；如需层级审计，请设置相应 Heading 样式",
+                )
 
     previous_level: int | None = None
     previous_title = ""
@@ -762,8 +815,8 @@ def _audit_structure(
                     rule_id="structure.required_section_missing",
                     location={"part": "body", "section_requirement": str(required)},
                     evidence=f"未在标题样式中找到“{_preview(str(required))}”",
-                    message="用户指定的必需章节缺失",
-                    suggestion="补充该章节，或确认章节名称和规则清单是否正确",
+                    message="未在标题样式中识别到用户指定的必需章节",
+                    suggestion="确认章节是否存在但未使用标题样式，再决定补充章节或调整样式及清单",
                 )
     else:
         collector.finding(
@@ -784,20 +837,16 @@ def _audit_fields_and_format(
     rules: Mapping[str, Any],
 ) -> None:
     placeholder_pattern = _placeholder_regex(rules)
+    blank_groups: list[list[Mapping[str, Any]]] = []
     for context in paragraphs:
         text = str(context["text"])
         location = context["location"]
         is_top_level_body = context["part"] == "body" and "table_index" not in location
-        if not _compact_text(text) and is_top_level_body:
-            collector.finding(
-                severity=_rule_severity(rules, "fields.empty_paragraph", "warning"),
-                rule_id="fields.empty_paragraph",
-                location=location,
-                locator=context.get("locator"),
-                evidence="该正文段落不包含可见文字；请结合前后文定位",
-                message="发现正文空白段落标记",
-                suggestion="在 Word 中开启“显示/隐藏编辑标记(¶)”核对；若只是有意留白可忽略，否则删除多余段落",
-            )
+        if not _compact_text(text) and is_top_level_body and not _content_carrier(context["paragraph"]):
+            if blank_groups and blank_groups[-1][-1]["paragraph"]._p.getnext() is context["paragraph"]._p:
+                blank_groups[-1].append(context)
+            else:
+                blank_groups.append([context])
         match = placeholder_pattern.search(text) if "table_index" not in location else None
         if match:
             collector.finding(
@@ -809,6 +858,25 @@ def _audit_fields_and_format(
                 message="发现可能未完成的占位内容",
                 suggestion="提交前替换占位符，或在规则配置中明确说明该占位符允许保留",
             )
+
+    for group in blank_groups:
+        first = group[0]
+        count = len(group)
+        locator = dict(first.get("locator", {}))
+        previous, following = locator.get("previous_text"), locator.get("next_text")
+        anchor = (f"“{previous}”之后" if previous else "正文起始处")
+        if following:
+            anchor += f"、“{following}”之前"
+        locator["label"] = f"正文中{anchor}的空白段落组（连续{count}个）"
+        location = dict(first["location"])
+        location["paragraph_indices"] = [c["location"]["paragraph_index"] for c in group]
+        collector.finding(
+            severity=_rule_severity(rules, "fields.empty_paragraph", "warning" if count > 1 else "info"),
+            rule_id="fields.empty_paragraph", location=location, locator=locator,
+            evidence=f"连续{count}个无文字、无已识别内容对象或分隔符的正文段落；可能用于排版留白",
+            message="发现正文空白段落组",
+            suggestion="开启 Word 编辑标记核对排版意图；仅在确认多余时删除",
+        )
 
     for cell in cells:
         text = str(cell["text"])
@@ -832,13 +900,20 @@ def _audit_fields_and_format(
                 suggestion="提交前替换占位符，或在规则配置中明确说明该占位符允许保留",
             )
 
-    groups: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
+    groups: dict[tuple[Any, ...], list[dict[str, Any]]] = defaultdict(list)
     for context in paragraphs:
         if not _compact_text(str(context["text"])):
             continue
-        if _heading_level(context["paragraph"]) is not None:
+        role = _paragraph_role(context)
+        if role in {"heading", "title_candidate", "equation"}:
             continue
-        groups[(str(context["part"]), _style_name(context["paragraph"]))].append(dict(context))
+        loc = context["location"]
+        # Tables compare within a column and separate their first (potential header) row.
+        key = (context["part"], loc.get("section_index"), loc.get("variant"),
+               loc.get("table_index"), loc.get("cell_index"),
+               loc.get("row_index") == 0 if "table_index" in loc else None,
+               role, _style_name(context["paragraph"]))
+        groups[key].append(dict(context))
 
     for group in groups.values():
         if len(group) < 3:
@@ -847,7 +922,7 @@ def _audit_fields_and_format(
         if len(signatures) < 2:
             continue
         dominant, dominant_count = signatures.most_common(1)[0]
-        if dominant_count < 2:
+        if dominant_count < 2 or dominant_count * 2 <= len(group):
             continue
         for context in group:
             current = _format_signature(context["paragraph"])
@@ -858,7 +933,7 @@ def _audit_fields_and_format(
                     rule_id="format.dominant_style_outlier",
                     location=context["location"],
                     locator=context.get("locator"),
-                    evidence=f"该段落的基础格式偏离同类段落主导格式。格式差异：{differences}",
+                    evidence=f"段落角色={_paragraph_role(context)}；同组{len(group)}段，主导格式{dominant_count}段。格式差异：{differences}",
                     message="发现同类段落的基础格式离群",
                     suggestion="对照同类段落检查字体、字号、对齐、缩进和间距；如有意不同，请通过规则说明",
                 )
@@ -872,7 +947,8 @@ def _unsupported_location(part: str, root: Any, element: Any, ordinal: int) -> d
     }
 
 
-def _scan_xml_part(root: Any, part: str, collector: _Collector) -> int:
+def _scan_xml_part(root: Any, part: str, collector: _Collector,
+                   contexts: Mapping[Any, Any] | None = None) -> int:
     if root is None:
         return 0
     counts: Counter[str] = Counter()
@@ -919,6 +995,25 @@ def _scan_xml_part(root: Any, part: str, collector: _Collector) -> int:
             location=_unsupported_location(part, root, element, ordinals[object_type]),
             count=1,
         )
+        ancestor = element
+        while ancestor is not None:
+            context = (contexts or {}).get(ancestor)
+            if context is not None:
+                item = collector.result["unsupported_objects"][-1]
+                item["location"].update(context["location"])
+                item["locator"] = dict(context.get("locator", {}))
+                if not _compact_text(context["text"]):
+                    loc = context["location"]
+                    label = _location_label({k: v for k, v in loc.items() if k != "paragraph_index"})
+                    previous = item["locator"].get("previous_text")
+                    following = item["locator"].get("next_text")
+                    if previous:
+                        label += f"中“{previous}”之后"
+                    if following:
+                        label += f"、“{following}”之前"
+                    item["locator"]["label"] = label + "的对象承载段落"
+                break
+            ancestor = ancestor.getparent()
     return counts.get("comment", 0)
 
 
@@ -943,10 +1038,12 @@ def _scan_package_comments(input_path: Path, collector: _Collector, existing_ref
         return
 
 
-def _scan_unsupported(doc: Any, input_path: Path, collector: _Collector) -> None:
+def _scan_unsupported(doc: Any, input_path: Path, collector: _Collector,
+                      paragraphs: Sequence[Mapping[str, Any]] = ()) -> None:
+    contexts = {c["paragraph"]._p: c for c in paragraphs}
     comment_references = 0
     body = getattr(getattr(doc, "element", None), "body", None)
-    comment_references += _scan_xml_part(body, "body", collector)
+    comment_references += _scan_xml_part(body, "body", collector, contexts)
     seen_parts: set[str] = set()
     for part_kind, section_index, variant, part in _iter_header_footer_parts(doc):
         partname = _part_name(part)
@@ -954,7 +1051,7 @@ def _scan_unsupported(doc: Any, input_path: Path, collector: _Collector) -> None
         if key in seen_parts:
             continue
         seen_parts.add(key)
-        comment_references += _scan_xml_part(getattr(part, "_element", None), part_kind, collector)
+        comment_references += _scan_xml_part(getattr(part, "_element", None), part_kind, collector, contexts)
     _scan_package_comments(input_path, collector, comment_references)
 
 
@@ -1010,7 +1107,7 @@ def audit_document(
             )
         if mode in {"full", "fields_format"}:
             _audit_fields_and_format(paragraphs, cells, collector, rules=normalized_rules)
-        _scan_unsupported(doc, path, collector)
+        _scan_unsupported(doc, path, collector, paragraphs)
     except AuditInputError as exc:
         _add_error(result, exc.code, exc.message, exc.detail)
     except Exception as exc:  # pragma: no cover - defensive CLI boundary
@@ -1094,10 +1191,12 @@ def render_result(result: Mapping[str, Any], format_name: str = "json") -> str:
         lines.append("- 未识别到基础范围之外的对象。")
     for item in unsupported:
         location = item.get("location", {})
+        locator = item.get("locator", {})
         lines.extend(
             [
                 f"### {item.get('id', '')} [{item.get('object_type', '')}]",
-                f"- 位置：{_location_label(location)}",
+                f"- 位置：{locator.get('label') or _location_label(location)}",
+                f"- 附近文字：{locator.get('text') or locator.get('previous_text', '')} / {locator.get('next_text', '')}",
                 f"- 技术定位：{_location_text(location)}",
                 f"- 数量：{item.get('count', 0)}",
                 f"- 原因：{item.get('reason', '')}",

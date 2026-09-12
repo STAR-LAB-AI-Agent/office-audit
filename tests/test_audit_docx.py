@@ -32,13 +32,12 @@ class AuditDocxTests(unittest.TestCase):
             markdown = render_result(result, "markdown")
 
             self.assertIn(
-                "位置：正文中“上文定位文字”之后、“下文定位文字”之前的第1个空白段落（连续2个）",
+                "位置：正文中“上文定位文字”之后、“下文定位文字”之前的空白段落组（连续2个）",
                 markdown,
             )
-            self.assertIn(
-                "位置：正文中“上文定位文字”之后、“下文定位文字”之前的第2个空白段落（连续2个）",
-                markdown,
-            )
+            blanks = [f for f in result['findings'] if f['rule_id'] == 'fields.empty_paragraph']
+            self.assertEqual(len(blanks), 1)
+            self.assertEqual(blanks[0]['location']['paragraph_indices'], [1, 2])
             self.assertIn("前文：“上文定位文字”", markdown)
             self.assertIn("后文：“下文定位文字”", markdown)
             self.assertIn("位置：正文中以“格式离群段落”开头的段落", markdown)

@@ -48,7 +48,7 @@
       "description": "包含空段落、空单元格、TODO 占位符和同类段落格式离群",
       "expected_summary": {"error": 0},
       "expected_findings": [
-        {"rule_id": "fields.empty_paragraph", "severity": "warning"},
+        {"rule_id": "fields.empty_paragraph", "severity": "info"},
         {"rule_id": "fields.empty_cell", "severity": "warning"},
         {"rule_id": "fields.placeholder", "severity": "warning"},
         {"rule_id": "format.dominant_style_outlier", "severity": "warning"}
