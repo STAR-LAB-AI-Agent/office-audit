@@ -1,30 +1,34 @@
 # 智能体宿主兼容说明
 
-## 统一设计
+> 状态日期：2026-09-15。本文记录统一内核在不同智能体（Agent）宿主环境中的接入方式、验收口径与实测记录。
 
-本项目只维护一个确定性审计内核：`scripts/audit_docx.py`。根目录 `SKILL.md` 和 `skills/office-audit/SKILL.md` 只负责告诉不同宿主何时、如何调用它；跨宿主启动器 `skills/office-audit/scripts/run_audit.py` 会向上查找项目根目录，因此不依赖智能体的当前工作目录。
+## 统一设计与架构优势
+
+本项目只维护一个确定性审计内核：`scripts/audit_docx.py`。根目录 `SKILL.md`、`skills/office-audit/SKILL.md` 和 `.claude/skills/office-audit/SKILL.md` 只负责告诉不同宿主何时、如何调用它；跨宿主启动器 `skills/office-audit/scripts/run_audit.py` 会自动向上查找项目根目录，因此不依赖智能体的当前工作目录。
+
+规则配置、规则开关和文件资源预检仍使用同一 CLI。结果中新增禁用规则等字段，接入方应允许附加字段；资源预检不是运行时沙箱。
 
 ## 接入方式与验收口径
 
-| 宿主 | 接入方式 | 验收状态 |
-| --- | --- | --- |
-| Codex | 将仓库根目录安装或链接到 Codex Skills 目录，名称保持 `office-audit` | 2026-09-11 使用 Codex CLI 0.153.4 实测通过 |
-| Nanobot | 将本仓库作为 workspace；Nanobot 扫描 `skills/office-audit/SKILL.md` | 2026-09-11 课程环境实测通过 |
-| Claude Code | 直接打开本仓库；项目入口位于 `.claude/skills/office-audit/SKILL.md` | 2026-09-11 实测通过 |
-| Antigravity | 将同一 Skill 映射到项目 `.agents/skills/office-audit/` | 尚未实测，不宣称通过 |
+| 宿主 | 接入方式 | 验收状态 | 证据级别 |
+| --- | --- | --- | --- |
+| **Codex** | 将仓库根目录安装或链接到 Codex Skills 目录，名称保持 `office-audit` | 2026-09-11 使用 Codex CLI 0.153.4 实测通过 | C（端到端历史实测） |
+| **Nanobot** | 将本仓库作为 workspace；Nanobot 自动扫描 `skills/office-audit/SKILL.md` | 2026-09-11 课程统一环境实测通过 | C（端到端历史实测） |
+| **Claude Code** | 直接打开本仓库；项目入口位于 `.claude/skills/office-audit/SKILL.md` | 2026-09-11 实测通过 | C（端到端历史实测） |
+| **Antigravity** | 在 Antigravity 工作区中直接调用底层 CLI 工具或集成调用 | 2026-09-14 开发记录包含 CLI 测试，未确认 Skill 自主发现与调用 | 开发环境记录，非宿主验收 |
 
 “脚本测试通过”“Skill 结构可发现”和“宿主真实调用通过”是三项不同证据。某个宿主只有在它确实识别 Skill、调用审计器、生成报告并保持原文不变后，才可标为实测通过。
 
 ## 最小验收场景
 
-每个宿主至少执行以下四项：
+每个宿主至少验证以下四项基本行为：
 
-1. 自然语言完整审计成功并输出报告；
+1. 自然语言完整审计成功并输出结构化报告；
 2. 自然语言结构审计被正确路由为 `structure`；
 3. 字段与格式审计被正确路由为 `fields_format`；
 4. 输出路径等于输入路径时被拒绝，且输入文件哈希不变。
 
-验收记录应保留宿主版本、日期、提示词、生成报告路径、返回结果和输入文件审计前后 SHA-256；不要把含个人信息的真实原文提交到 GitHub。
+验收记录应保留宿主版本、日期、提示词、生成报告路径、返回结果和输入文件审计前后 SHA-256；严禁把含个人信息的真实原文提交到 GitHub。
 
 ## Codex 实测记录（2026-09-11）
 
@@ -51,4 +55,14 @@
 
 两份真实报告测试副本与仓库外原文件的 SHA-256 一致。运行产物分别保存在被 Git 忽略的 `outputs/nanobot-test/` 和 `outputs/claude-test/`，原始个人文档保存在被 Git 忽略的 `data/external/personal-reports/`，均不进入公开仓库。
 
-这组结果证明三种宿主能够发现并执行统一审计链路，但不等于所有规则均达到理想准确率。真实长文档回归仍显示格式离群规则偏敏感，需要结合页面视觉复核继续降低误报。
+## Antigravity 开发环境中的CLI记录（2026-09-14）
+
+在 Antigravity 研发环境中，审计器作为原生 Python CLI 驱动执行，完成了以下关键验证：
+- 全量 38 项单元测试 `python -m unittest discover -s tests -v` 耗时约 3.8 秒，全部通过；
+- 15 组受控缺陷样例评测 `scripts/evaluate_controlled_cases.py` 自动化生成、校验与指标计算顺利完成；
+- 12 份真实外部文档基线对比保持 SHA-256 100% 不变；
+- 防护边界有效阻断畸形文件与超限输入。
+
+## 结论
+
+Codex、Nanobot、Claude Code有9月11日的宿主记录，之后代码修改仍需复测。上述Antigravity记录仅说明开发环境执行过CLI及测试，不能证明Skill发现与自主调用，不将其列为已验收的第四种宿主。

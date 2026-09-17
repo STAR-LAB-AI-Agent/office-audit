@@ -1,72 +1,79 @@
-# AI Office 文档审计：开源代码报告（证据版草稿）
+# AI Office 文档审计开源代码报告
 
-> 状态：阶段性草稿（更新至 2026-09-11），不代表最终开源代码报告或公开发布验收已经完成。当前数量和完成状态见[当前验收状态](validation-status.md)。
+专业实习课题 #03　作者署名 Wh1t3zZ114　2026年9月15日
 
-## 1. 项目说明
+## 一 项目任务
 
-项目名称：AI Office 文档审计 Skill。
+本项目面向通用 Word 文档，检查标题层级、用户指定的缺失章节、空白字段、占位内容与基础格式差异，并生成可定位的问题清单。成品由一套Python审计内核和多个Skill入口组成，可通过命令行独立运行，也可由Codex、Nanobot或Claude Code调用。
 
-项目目标：针对通用 Word 文档提供离线、只读、可追溯的结构、字段和基础格式审计。核心格式为 .docx，输出结构化 JSON，并提供 Markdown/终端投影。
+项目选择以DOCX作为第一版输入格式，是为了把解析、定位和只读边界做清楚，而不是把“通用文档”理解为必须支持所有Office格式。通用性体现在不固定学校模板、用户可配置章节清单，以及对报告、通知、会议纪要、申请材料等文档使用相同接口。
 
-适用文档：课程报告、通知、会议纪要、制度文件、项目方案、申请材料和模板等。系统不把任何单一学校模板硬编码为通用标准。
+## 二 架构与职责
 
-## 2. 目录与职责
-
-| 路径 | 职责 |
+| 文件或目录 | 职责 |
 | --- | --- |
-| scripts/audit_docx.py | 核心 .docx 解析、三类模式、规则引擎、CLI 和结果投影 |
-| scripts/evaluate_manifest.py | 读取仓库外真实候选，只输出脱敏统计，不下载、不改 manifest |
-| scripts/evaluate_controlled_cases.py | 生成临时受控变体并核对期望标签 |
-| scripts/demo_audit.py | 生成无个人信息的端到端演示文档 |
-| tests/test_audit_docx.py | 核心审计与安全回归用例；当前总数见[验收状态](validation-status.md) |
-| tests/test_skill_layout.py | 多宿主 Skill 目录与启动器回归用例；当前总数见[验收状态](validation-status.md) |
-| fixtures/controlled-cases.json | 受控样例标签，不含原始文档 |
-| data/public-samples.manifest.json | 公开样例元数据和许可证/PII 核验状态 |
-| SKILL.md | Skill 触发条件、边界、调用方式和结果约束 |
-| docs/ | 设计、研究、性能、演示和交付证据 |
+| SKILL.md | 通用宿主入口和任务边界 |
+| skills/office-audit/ | 工作区型宿主入口与跨宿主启动器 |
+| .claude/skills/office-audit/ | Claude Code项目入口 |
+| agents/openai.yaml | Codex展示元数据 |
+| scripts/audit_docx.py | 解析、规则、结果渲染与CLI |
+| scripts/evaluate_controlled_cases.py | 临时生成受控文档并核对标签 |
+| fixtures/controlled-cases.json | 受控样例标签，不包含真实原文 |
+| tests/ | 正例、反例、异常和安全边界测试 |
+| references/rules-example.json | 自定义规则示例 |
+| docs/ | 设计、验证、使用说明与报告 |
 
-## 3. 运行方式
+宿主将用户要求整理成参数，审计内核调用python-docx遍历正文、表格和页眉页脚，再执行确定性检查。JSON是主结果；Markdown和终端摘要使用同一份结构化数据。三种宿主不维护独立规则，避免不同入口出现不同审计语义。
 
-安装依赖：
+问题条目包括rule_id、severity、location、locator、evidence及suggestion。空白段落按连续组报告前后文字和paragraph_indices。未审计对象逐个记录，不将“没有告警”描述为全文合规。关闭的规则也明确列入disabled_rules。
 
-    python -m pip install -r requirements.txt
+## 三 开发过程与关键修改
 
-完整审计：
+初期先固定只读输入、独立输出、无固定模板和结构化错误等约束，再实现最小CLI。真实样例暴露了两个问题：Word中的可见编号不等于OOXML段落序号，格式差异也不一定是错误。随后增加文字锚点、空段分组和同类段落比较，降低人工核对成本。
 
-    python scripts/audit_docx.py --input path\to\document.docx --mode full --format json --output reports\audit.json
+后续扩展到15组受控样例，评测器同时检查应该出现与不该出现的规则。配置层增加规则开关、严重级别覆盖与资源预检。9月15日交付审查发现并修复了资源参数接受NaN、样例编号可越出临时目录、硬链接路径绕过只读保护，以及公式未单独标注等边界。
 
-自然语言路由：
+这些修改基于具体问题和回归测试，不代表系统能抵御所有恶意输入。项目保留格式继承、特殊文体、正则回溯和未审计复杂内容等限制，供使用者判断是否适合当前任务。
 
-    python scripts/audit_docx.py --input path\to\document.docx --request "全面检查这份 Word 文档" --format json
+## 四 安装与使用
 
-规则和安全验收：
+直接依赖为python-docx，版本范围为>=1.2,<2。该范围不是精确锁定文件；上游还会安装其传递依赖，例如lxml。项目代码与文档采用MIT许可证，作者署名为Wh1t3zZ114。依赖许可证以安装包及上游声明为准，不用本项目许可证覆盖第三方资产。
 
-    python scripts/evaluate_controlled_cases.py --format terminal
-    python -m unittest discover -s tests -v
+```powershell
+python -m pip install -r requirements.txt
+python scripts/demo_audit.py --output-dir outputs/demo
+python scripts/audit_docx.py --input outputs/demo/demo-input.docx --mode full --format json --output outputs/demo/audit.json
+```
 
-## 4. 依赖与许可证记录
+已有演示输出时，可换一个新目录；只有确认需要重新生成演示文件时再使用demo脚本的--force。
 
-- Python：2026-09-11 本轮验收环境为 3.9.0；该值是本轮环境记录，不是项目锁定版本。
-- python-docx：`requirements.txt` 约束 `>=1.2,<2`，用于读取和遍历 `.docx`；本轮实际导入 1.2.0，但项目不宣称固定安装该版本。官方项目见 [python-openxml/python-docx](https://github.com/python-openxml/python-docx)，许可证为 [MIT](https://github.com/python-openxml/python-docx/blob/master/LICENSE)。
-- 项目代码：仓库根目录已提供 [MIT LICENSE](../LICENSE)。该许可证不改变第三方文档本体的版权与再分发边界。
-- 公开数据：当前只提交元数据 manifest。docx-corpus 的元数据许可、文档本体版权和文件级再分发权分开记录，文件级许可未确认前不提交原文。
+结构审计可传入--required-sections，字段与格式审计使用--mode fields_format，也可以通过--request传入自然语言。三类请求分别为“完整检查这份文档”“只检查标题层级和缺失章节”“检查空字段、占位符和格式”。未指定章节标准时，程序明确提示未指定，而不是默认要求某些固定章节。
 
-## 5. 当前验收证据
+--rules接受JSON配置，支持严重级别覆盖、禁用规则与资源限制。placeholders是替换默认词表，placeholder_pattern优先于词表；自定义正则仅用于可信配置，语法检查不能保证执行时间。报告路径及日志路径不得覆盖输入文件或彼此覆盖。
 
-1. 2026-09-11 本轮 16/16 unittest 通过，输入文档保护、输出隔离和日志最小化由对应回归用例覆盖。
-2. 2026-09-11 本轮受控标签验收 5/5 通过。
-3. Codex、Nanobot 和 Claude Code 已有端到端记录；Antigravity 未验证。
-4. 公开候选已有仓库外下载和 12/12 离线解析的历史工程记录，但当前仍是 12/12 `pending`、PII 12/12 `not_started`、文件级再分发 12/12 `UNVERIFIED`。
-5. 本轮只读核验确认当前分支为 `main`，远程 HEAD 也指向 `main`，`origin` 为 <https://github.com/STAR-LAB-AI-Agent/office-audit.git>，根目录已有 MIT `LICENSE`。
-6. 其余已运行证据和不能外推的边界见[当前验收状态](validation-status.md)；历史编译、Skill 校验和敏感信息扫描记录不等于本轮重新执行。
+## 五 测试与结果
 
-## 6. 发布前清单
+9月15日在Python 3.9.0和3.12.14分别完成46项单元测试，均通过；15组受控评测全部通过。文档—规则级指标为TP=8、FP=0、FN=0、TN=27，精确率和召回率均为100%。指标仅适用于预先定义的合成样例，不能用作真实文档准确率或安全保障承诺。
 
-- [ ] 根据老师最终要求补齐正式实验报告、AI 安全案例报告和实习总结。
-- [ ] 完成 15 天实习手册记录，每日不少于 400 字，并检查页面排版。
-- [ ] 完成 1 分钟内演示视频，展示自然语言路由、JSON 结果和逐项未审计对象。
-- [ ] 对公开候选逐份完成 PII 抽查和再分发许可核对；未通过的只保留 metadata/pending 或 rejected。
-- [x] 仓库根目录提供 MIT `LICENSE`，README 记录 `python-docx` 名称、版本范围、许可证和实际用途。
-- [x] GitHub `origin` 已配置为 <https://github.com/STAR-LAB-AI-Agent/office-audit.git>。
-- [ ] 最后执行密钥、个人信息、原文、临时文件、Git 历史和报告链接检查。
-- [ ] 核对远程仓库可见性、默认分支、最终提交内容和发布说明；不得仅凭已配置 `origin` 宣称公开交付完成。
+12份仓库外真实文档本轮回归均无解析错误，输入哈希保持不变，已识别未审计对象仍为33个。9月11日保留了Codex、Nanobot、Claude Code宿主运行记录；之后的修改须另行复测。GitHub Actions工作流已经配置，但云端执行结果须查看实际运行记录。
+
+```powershell
+python -m unittest discover -s tests -v
+python scripts/evaluate_controlled_cases.py --format terminal
+```
+
+完整实验条件、逐份计数、性能数据和已知不足见实验报告。测试计数发生变化时，应先更新验证证据，再修改报告。
+
+## 六 安全与开源边界
+
+审计内核本地运行且不调用模型或网络API，但宿主本身可能使用在线模型。真实文件进入宿主测试前，需要确认其数据处理方式符合使用者要求。结果中的证据片段也可能带有个人信息，因此报告同样不能随意公开。
+
+代码仓库保留样例元数据和合成构造方法，不提交真实原文、个人实习手册、密钥或私人审计报告。外部样例的发布状态与本地检测能力分开管理。Git忽略规则能防止误添加，但不自动清除曾经提交的历史内容。
+
+默认资源预检包括文件体积、ZIP条目、声明解压总量和条件性的压缩比检查。这些是有限预检，不是进程级内存或CPU隔离。只读路径保护和哈希回归有助于防止误覆盖，也不能替代操作系统权限和可信运行环境。
+
+## 七 项目总结
+
+目前版本适合用于课程展示和辅助人工检查：输入输出明确，结果可以追溯到规则与位置，核心可独立测试。它还不能替代最终排版审阅、专业内容审核或安全查杀。后续改进应优先完善格式继承与真实样例标签，不急于增加OCR或自动修复等新功能。
+
+开源仓库：[STAR-LAB-AI-Agent/office-audit](https://github.com/STAR-LAB-AI-Agent/office-audit)。项目许可证见根目录LICENSE；依赖上游见[python-docx](https://github.com/python-openxml/python-docx)；当前验证状态见docs/validation-status.md。最终提交版本由实际Git提交号与测试记录共同标识。

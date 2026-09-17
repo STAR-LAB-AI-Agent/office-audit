@@ -1,0 +1,25 @@
+{
+  "required_sections": [],
+  "placeholders": [
+    "TODO",
+    "待补充",
+    "TBD",
+    "【请填写】"
+  ],
+  "severity_overrides": {
+    "fields.empty_paragraph": "info",
+    "structure.heading_level_jump": "error"
+  },
+  "disabled_rules": [
+    "format.dominant_style_outlier"
+  ],
+  "rule_switches": {
+    "fields.empty_cell": true
+  },
+  "limits": {
+    "max_file_size_bytes": 52428800,
+    "max_zip_entries": 1000,
+    "max_uncompressed_bytes": 157286400,
+    "max_compression_ratio": 100.0
+  }
+}

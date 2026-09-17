@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import re
 import sys
@@ -38,7 +39,50 @@ DEFAULT_PLACEHOLDERS = (
 )
 PLACEHOLDER_PATTERN = re.compile(r"TODO|TBD|待填写|待补充|请填写|_{3,}", re.IGNORECASE)
 HEADING_PATTERN = re.compile(r"(?:heading|标题)\s*([1-9])", re.IGNORECASE)
+KNOWN_RULE_KEYS = {
+    "severity_overrides",
+    "disabled_rules",
+    "rule_switches",
+    "placeholders",
+    "placeholder_pattern",
+    "required_sections",
+    "limits",
+}
+KNOWN_RULE_IDS = {
+    "structure.no_headings",
+    "structure.title_candidate",
+    "structure.heading_level_jump",
+    "structure.required_section_missing",
+    "structure.required_sections_not_specified",
+    "fields.empty_paragraph",
+    "fields.empty_cell",
+    "fields.placeholder",
+    "fields.placeholder_cell",
+    "format.dominant_style_outlier",
+}
+DEFAULT_LIMITS = {
+    "max_file_size_bytes": 50 * 1024 * 1024,  # 50 MB
+    "max_zip_entries": 1000,
+    "max_uncompressed_bytes": 150 * 1024 * 1024,  # 150 MB
+    "max_compression_ratio": 100.0,
+}
+
+
+def _is_rule_enabled(rules: Mapping[str, Any], rule_id: str) -> bool:
+    disabled = rules.get("disabled_rules")
+    if isinstance(disabled, (list, tuple, set)) and rule_id in disabled:
+        return False
+    switches = rules.get("rule_switches")
+    if isinstance(switches, Mapping) and switches.get(rule_id) is False:
+        return False
+    return True
+
 UNSUPPORTED_OBJECT_TYPES = {
+    "equation": (
+        "公式内部表达式未参与内容或格式审计",
+        "公式中的符号、数值及编号可能未核验",
+        "请结合公式所在段落人工核对表达式与编号",
+    ),
     "image_or_drawing": (
         "第一版只记录图片或绘图对象，不读取其中的文字",
         "图片中的标题、字段或扫描文字可能未参与审计",
@@ -187,8 +231,9 @@ def classify_request(request: str) -> dict[str, Any]:
 
 
 class _Collector:
-    def __init__(self, result: dict[str, Any]) -> None:
+    def __init__(self, result: dict[str, Any], rules: Mapping[str, Any] | None = None) -> None:
         self.result = result
+        self.rules = rules or {}
         self._finding_number = 0
         self._unsupported_number = 0
 
@@ -203,6 +248,8 @@ class _Collector:
         message: str,
         suggestion: str,
     ) -> None:
+        if not _is_rule_enabled(self.rules, rule_id):
+            return
         if severity not in SEVERITIES:
             severity = "warning"
         self._finding_number += 1
@@ -738,6 +785,9 @@ def _rule_severity(rules: Mapping[str, Any], rule_id: str, default: str) -> str:
 
 
 def _placeholder_regex(rules: Mapping[str, Any]) -> re.Pattern[str]:
+    pattern_str = rules.get("placeholder_pattern")
+    if pattern_str:
+        return re.compile(pattern_str, re.IGNORECASE)
     configured = rules.get("placeholders")
     if configured is None:
         return PLACEHOLDER_PATTERN
@@ -847,7 +897,7 @@ def _audit_fields_and_format(
                 blank_groups[-1].append(context)
             else:
                 blank_groups.append([context])
-        match = placeholder_pattern.search(text) if "table_index" not in location else None
+        match = placeholder_pattern.search(text) if "table_index" not in location and _is_rule_enabled(rules, "fields.placeholder") else None
         if match:
             collector.finding(
                 severity=_rule_severity(rules, "fields.placeholder", "warning"),
@@ -880,7 +930,7 @@ def _audit_fields_and_format(
 
     for cell in cells:
         text = str(cell["text"])
-        if not _compact_text(text):
+        if not _compact_text(text) and not any(_content_carrier(p) for p in cell["cell"].paragraphs):
             collector.finding(
                 severity=_rule_severity(rules, "fields.empty_cell", "warning"),
                 rule_id="fields.empty_cell",
@@ -889,7 +939,7 @@ def _audit_fields_and_format(
                 message="发现空表格单元格",
                 suggestion="确认该单元格是否应填写，或在规则中标记为允许为空",
             )
-        match = placeholder_pattern.search(text)
+        match = placeholder_pattern.search(text) if _is_rule_enabled(rules, "fields.placeholder_cell") else None
         if match:
             collector.finding(
                 severity=_rule_severity(rules, "fields.placeholder_cell", "warning"),
@@ -899,6 +949,9 @@ def _audit_fields_and_format(
                 message="发现表格中的可能未完成占位内容",
                 suggestion="提交前替换占位符，或在规则配置中明确说明该占位符允许保留",
             )
+
+    if not _is_rule_enabled(rules, "format.dominant_style_outlier"):
+        return
 
     groups: dict[tuple[Any, ...], list[dict[str, Any]]] = defaultdict(list)
     for context in paragraphs:
@@ -975,6 +1028,8 @@ def _scan_xml_part(root: Any, part: str, collector: _Collector,
             object_type = "ole_object"
         elif local == "commentReference":
             object_type = "comment"
+        elif local == "oMathPara" or (local == "oMath" and not _has_ancestor(element, {"oMathPara"}, root)):
+            object_type = "equation"
         elif local in {
             "ins",
             "del",
@@ -1055,12 +1110,142 @@ def _scan_unsupported(doc: Any, input_path: Path, collector: _Collector,
     _scan_package_comments(input_path, collector, comment_references)
 
 
+def _check_resource_limits(path: Path, rules: Mapping[str, Any]) -> None:
+    custom_limits = rules.get("limits", {})
+    max_file_size = custom_limits.get("max_file_size_bytes", DEFAULT_LIMITS["max_file_size_bytes"])
+    max_entries = custom_limits.get("max_zip_entries", DEFAULT_LIMITS["max_zip_entries"])
+    max_uncompressed = custom_limits.get("max_uncompressed_bytes", DEFAULT_LIMITS["max_uncompressed_bytes"])
+    max_ratio = custom_limits.get("max_compression_ratio", DEFAULT_LIMITS["max_compression_ratio"])
+
+    stat = path.stat()
+    file_size = stat.st_size
+    if file_size > max_file_size:
+        raise AuditInputError(
+            "file_too_large",
+            f"文件大小 ({file_size} 字节) 超过安全上限 ({max_file_size} 字节)",
+            f"file_size={file_size}, max_file_size={max_file_size}",
+        )
+
+    try:
+        with zipfile.ZipFile(path) as archive:
+            infolist = archive.infolist()
+            entry_count = len(infolist)
+            if entry_count > max_entries:
+                raise AuditInputError(
+                    "zip_bomb_detected",
+                    f"DOCX 压缩包条目数 ({entry_count}) 超过安全上限 ({max_entries})",
+                    f"entry_count={entry_count}, max_zip_entries={max_entries}",
+                )
+
+            total_uncompressed = sum(info.file_size for info in infolist)
+            if total_uncompressed > max_uncompressed:
+                raise AuditInputError(
+                    "zip_bomb_detected",
+                    f"DOCX 解压后总体积 ({total_uncompressed} 字节) 超过安全上限 ({max_uncompressed} 字节)",
+                    f"uncompressed_bytes={total_uncompressed}, max_uncompressed_bytes={max_uncompressed}",
+                )
+
+            if file_size > 0:
+                ratio = total_uncompressed / file_size
+                if total_uncompressed > 5 * 1024 * 1024 and ratio > max_ratio:
+                    raise AuditInputError(
+                        "zip_bomb_detected",
+                        f"DOCX 解压膨胀比 ({ratio:.1f}x) 异常，疑似 Zip Bomb",
+                        f"compression_ratio={ratio:.1f}, max_compression_ratio={max_ratio}",
+                    )
+    except (zipfile.BadZipFile, OSError):
+        pass
+
+
 def _normalize_rules(rules: Mapping[str, Any] | None) -> dict[str, Any]:
     if rules is None:
         return {}
     if not isinstance(rules, Mapping):
         raise AuditInputError("invalid_rules", "规则配置必须是 JSON 对象")
-    return dict(rules)
+
+    unknown_keys = set(rules.keys()) - KNOWN_RULE_KEYS
+    if unknown_keys:
+        raise AuditInputError(
+            "invalid_rules",
+            f"规则配置包含不支持的键：{', '.join(sorted(map(str, unknown_keys)))}",
+            f"支持的键包括：{', '.join(sorted(KNOWN_RULE_KEYS))}",
+        )
+
+    result = dict(rules)
+
+    if "severity_overrides" in result:
+        overrides = result["severity_overrides"]
+        if not isinstance(overrides, Mapping):
+            raise AuditInputError("invalid_rules", "severity_overrides 必须是 JSON 对象（字典）")
+        for rid, sev in overrides.items():
+            if rid not in KNOWN_RULE_IDS:
+                raise AuditInputError("invalid_rules", f"severity_overrides 包含未知规则 ID：{rid!r}")
+            if sev not in SEVERITIES:
+                raise AuditInputError(
+                    "invalid_rules",
+                    f"规则 {rid} 的严重级别 {sev!r} 非法",
+                    f"允许的严重级别为：{', '.join(SEVERITIES)}",
+                )
+
+    if "disabled_rules" in result:
+        disabled = result["disabled_rules"]
+        if not isinstance(disabled, Sequence) or isinstance(disabled, (str, bytes, bytearray)):
+            raise AuditInputError("invalid_rules", "disabled_rules 必须是字符串列表")
+        for item in disabled:
+            if not isinstance(item, str) or item not in KNOWN_RULE_IDS:
+                raise AuditInputError("invalid_rules", f"disabled_rules 包含非法或未知规则 ID：{item!r}")
+
+    if "rule_switches" in result:
+        switches = result["rule_switches"]
+        if not isinstance(switches, Mapping):
+            raise AuditInputError("invalid_rules", "rule_switches 必须是字典")
+        for rid, val in switches.items():
+            if rid not in KNOWN_RULE_IDS:
+                raise AuditInputError("invalid_rules", f"rule_switches 包含未知规则 ID：{rid!r}")
+            if not isinstance(val, bool):
+                raise AuditInputError("invalid_rules", f"rule_switches[{rid!r}] 必须是布尔值 (true/false)")
+
+    if "placeholders" in result:
+        placeholders = result["placeholders"]
+        if not isinstance(placeholders, Sequence) or isinstance(placeholders, (str, bytes, bytearray)):
+            raise AuditInputError("invalid_rules", "placeholders 必须是字符串列表")
+        for item in placeholders:
+            if not isinstance(item, str) or not item.strip():
+                raise AuditInputError("invalid_rules", f"placeholders 包含无效项：{item!r}")
+
+    if "placeholder_pattern" in result:
+        pattern = result["placeholder_pattern"]
+        if not isinstance(pattern, str) or not pattern.strip():
+            raise AuditInputError("invalid_rules", "placeholder_pattern 必须是非空正则表达式字符串")
+        try:
+            re.compile(pattern)
+        except re.error as exc:
+            raise AuditInputError("invalid_rules", f"placeholder_pattern 正则表达式语法错误：{exc}") from None
+
+    if "required_sections" in result:
+        sections = result["required_sections"]
+        if not isinstance(sections, Sequence) or isinstance(sections, (str, bytes, bytearray)):
+            raise AuditInputError("invalid_rules", "required_sections 必须是字符串列表")
+        for item in sections:
+            if not isinstance(item, str) or not item.strip():
+                raise AuditInputError("invalid_rules", f"required_sections 包含无效项：{item!r}")
+
+    if "limits" in result:
+        limits = result["limits"]
+        if not isinstance(limits, Mapping):
+            raise AuditInputError("invalid_rules", "limits 必须是字典")
+        for k, v in limits.items():
+            if k not in DEFAULT_LIMITS:
+                raise AuditInputError("invalid_rules", f"limits 包含不支持的限制项：{k!r}")
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v <= 0:
+                raise AuditInputError("invalid_rules", f"limits[{k!r}] 必须是大于0的有限数值")
+            if k != "max_compression_ratio" and not isinstance(v, int):
+                raise AuditInputError("invalid_rules", f"limits[{k!r}] 必须是正整数")
+
+    return result
+
+
+validate_rules_configuration = _normalize_rules
 
 
 def audit_document(
@@ -1088,6 +1273,9 @@ def audit_document(
         if not os.access(path, os.R_OK):
             raise AuditInputError("input_not_readable", "输入文件不可读取", str(path))
         normalized_rules = _normalize_rules(rules)
+        _check_resource_limits(path, normalized_rules)
+        collector.rules = normalized_rules
+        result["disabled_rules"] = sorted(rid for rid in KNOWN_RULE_IDS if not _is_rule_enabled(normalized_rules, rid))
         if required_sections is None:
             configured = normalized_rules.get("required_sections")
             if isinstance(configured, Sequence) and not isinstance(configured, (str, bytes, bytearray)):
@@ -1137,6 +1325,9 @@ def render_result(result: Mapping[str, Any], format_name: str = "json") -> str:
         "",
     ]
     routing = result.get("request_routing")
+    if result.get("disabled_rules"):
+        lines.append("- 本次未执行的规则：" + ", ".join(result["disabled_rules"]))
+        lines.append("")
     if isinstance(routing, Mapping):
         lines.insert(
             3,
@@ -1249,6 +1440,12 @@ def _load_required_sections(path_value: str | None) -> list[str] | None:
 
 
 def _same_path(left: Path, right: Path) -> bool:
+    if left.exists() and right.exists():
+        try:
+            if os.path.samefile(left, right):
+                return True
+        except OSError:
+            pass
     return os.path.normcase(str(left.resolve(strict=False))) == os.path.normcase(
         str(right.resolve(strict=False))
     )

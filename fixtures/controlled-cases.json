@@ -1,12 +1,13 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "manifest_type": "controlled-audit-cases",
   "title": "受控 Word 缺陷样例标签",
   "policy": {
     "raw_documents_in_git": false,
     "generation": "每次评估时在系统临时目录生成，运行结束后由临时目录生命周期处理",
     "contains_personal_information": false,
-    "label_meaning": "expected_findings 和 expected_unsupported 只描述本项目确定性规则应命中的标签，不代表真实文档的人工质量结论"
+    "label_meaning": "expected_findings、expected_absent_rules 和 expected_unsupported 只描述本项目确定性规则在受控合成样例下的预期标签，不代表真实文档的人工质量结论",
+    "metrics_scope": "指标仅针对 warning 和 error 缺陷规则进行文档-规则级判定，信息提示 (info)、未审计对象与解析错误分别单独核验"
   },
   "cases": [
     {
@@ -15,7 +16,16 @@
       "mode": "full",
       "description": "标题、正文和表格均有内容的通用文档基线",
       "expected_summary": {"error": 0, "warning": 0},
-      "expected_findings": [],
+      "expected_findings": [
+        {"rule_id": "structure.required_sections_not_specified", "severity": "info"}
+      ],
+      "expected_absent_rules": [
+        "format.dominant_style_outlier",
+        "structure.heading_level_jump",
+        "fields.empty_paragraph",
+        "fields.empty_cell",
+        "fields.placeholder"
+      ],
       "expected_unsupported": []
     },
     {
@@ -26,6 +36,9 @@
       "expected_summary": {"error": 0},
       "expected_findings": [
         {"rule_id": "structure.heading_level_jump", "severity": "warning"}
+      ],
+      "expected_absent_rules": [
+        "structure.required_section_missing"
       ],
       "expected_unsupported": []
     },
@@ -38,6 +51,9 @@
       "expected_summary": {"error": 1},
       "expected_findings": [
         {"rule_id": "structure.required_section_missing", "severity": "error"}
+      ],
+      "expected_absent_rules": [
+        "structure.heading_level_jump"
       ],
       "expected_unsupported": []
     },
@@ -53,6 +69,7 @@
         {"rule_id": "fields.placeholder", "severity": "warning"},
         {"rule_id": "format.dominant_style_outlier", "severity": "warning"}
       ],
+      "expected_absent_rules": [],
       "expected_unsupported": []
     },
     {
@@ -60,9 +77,161 @@
       "builder": "unsupported_drawing_object",
       "mode": "full",
       "description": "含绘图 XML 对象，验证逐项未审计对象告警",
-      "expected_summary": {"error": 0},
-      "expected_findings": [],
+      "expected_summary": {"error": 0, "warning": 0},
+      "expected_findings": [
+        {"rule_id": "structure.required_sections_not_specified", "severity": "info"}
+      ],
+      "expected_absent_rules": [
+        "format.dominant_style_outlier",
+        "fields.empty_paragraph"
+      ],
       "expected_unsupported": ["image_or_drawing"]
+    },
+    {
+      "id": "clean-rich-layout",
+      "builder": "clean_rich_layout",
+      "mode": "full",
+      "required_sections": ["第一章 总体概述"],
+      "description": "包含合法标题、项目符号列表、块引用和规范表格的富文本正常排版",
+      "expected_summary": {"error": 0, "warning": 0},
+      "expected_findings": [],
+      "expected_absent_rules": [
+        "format.dominant_style_outlier",
+        "structure.heading_level_jump",
+        "structure.required_section_missing",
+        "fields.empty_paragraph",
+        "fields.empty_cell",
+        "fields.placeholder"
+      ],
+      "expected_unsupported": []
+    },
+    {
+      "id": "single-empty-paragraph",
+      "builder": "single_empty_paragraph",
+      "mode": "fields_format",
+      "description": "段落间仅存在单个空段，验证降级为 info 提示而非 warning 警告",
+      "expected_summary": {"error": 0, "warning": 0, "info": 1},
+      "expected_findings": [
+        {"rule_id": "fields.empty_paragraph", "severity": "info"}
+      ],
+      "expected_absent_rules": [
+        "format.dominant_style_outlier"
+      ],
+      "expected_unsupported": []
+    },
+    {
+      "id": "consecutive-empty-paragraphs",
+      "builder": "consecutive_empty_paragraphs",
+      "mode": "fields_format",
+      "description": "包含连续3个空段，验证合并告警为 warning 且包含全部段落索引",
+      "expected_summary": {"error": 0, "warning": 1},
+      "expected_findings": [
+        {"rule_id": "fields.empty_paragraph", "severity": "warning"}
+      ],
+      "expected_absent_rules": [
+        "format.dominant_style_outlier"
+      ],
+      "expected_unsupported": []
+    },
+    {
+      "id": "table-boundary-blanks",
+      "builder": "table_boundary_blanks",
+      "mode": "fields_format",
+      "description": "表格前后各有一个空段，验证不跨表格合并，分别独立报告为 info",
+      "expected_summary": {"error": 0, "warning": 0, "info": 2},
+      "expected_findings": [
+        {"rule_id": "fields.empty_paragraph", "severity": "info"}
+      ],
+      "expected_absent_rules": [
+        "format.dominant_style_outlier"
+      ],
+      "expected_unsupported": []
+    },
+    {
+      "id": "content-carrier-paragraphs",
+      "builder": "content_carrier_paragraphs",
+      "mode": "full",
+      "description": "段落中无普通文字但包含绘图、公式或分页符，验证不误判为空白段落",
+      "expected_summary": {"error": 0, "warning": 0},
+      "expected_findings": [
+        {"rule_id": "structure.required_sections_not_specified", "severity": "info"}
+      ],
+      "expected_absent_rules": [
+        "fields.empty_paragraph",
+        "format.dominant_style_outlier"
+      ],
+      "expected_unsupported": ["image_or_drawing", "equation"]
+    },
+    {
+      "id": "visual-title-candidate",
+      "builder": "visual_title_candidate",
+      "mode": "structure",
+      "required_sections": ["项目说明"],
+      "description": "文档使用Title样式或首段居中加粗，产生标题候选提示但不能自动抵扣必需章节",
+      "expected_summary": {"error": 1},
+      "expected_findings": [
+        {"rule_id": "structure.title_candidate", "severity": "info"},
+        {"rule_id": "structure.required_section_missing", "severity": "error"},
+        {"rule_id": "structure.no_headings", "severity": "info"}
+      ],
+      "expected_absent_rules": [
+        "structure.heading_level_jump"
+      ],
+      "expected_unsupported": []
+    },
+    {
+      "id": "table-column-baselines",
+      "builder": "table_column_baselines",
+      "mode": "fields_format",
+      "description": "表格表头与数据行独立，各数据列具有独立格式基线，合法不同列不报离群",
+      "expected_summary": {"error": 0, "warning": 0},
+      "expected_findings": [],
+      "expected_absent_rules": [
+        "format.dominant_style_outlier",
+        "fields.empty_cell"
+      ],
+      "expected_unsupported": []
+    },
+    {
+      "id": "table-cell-outlier",
+      "builder": "table_cell_outlier",
+      "mode": "fields_format",
+      "description": "表格同列中大多数单元格格式一致，单个单元格格式突变，精准命中离群告警",
+      "expected_summary": {"error": 0, "warning": 1},
+      "expected_findings": [
+        {"rule_id": "format.dominant_style_outlier", "severity": "warning"}
+      ],
+      "expected_absent_rules": [
+        "fields.empty_cell"
+      ],
+      "expected_unsupported": []
+    },
+    {
+      "id": "no-majority-format",
+      "builder": "no_majority_format",
+      "mode": "fields_format",
+      "description": "多个正文段落格式各异且无任何一种格式过半，遵循保守原则不报离群告警",
+      "expected_summary": {"error": 0, "warning": 0},
+      "expected_findings": [],
+      "expected_absent_rules": [
+        "format.dominant_style_outlier"
+      ],
+      "expected_unsupported": []
+    },
+    {
+      "id": "unsupported-mixed-objects",
+      "builder": "unsupported_mixed_objects",
+      "mode": "full",
+      "description": "包含批注引用、文本框和OLE对象，验证逐项在未审计对象中归类登记",
+      "expected_summary": {"error": 0, "warning": 0},
+      "expected_findings": [
+        {"rule_id": "structure.required_sections_not_specified", "severity": "info"}
+      ],
+      "expected_absent_rules": [
+        "format.dominant_style_outlier",
+        "fields.empty_paragraph"
+      ],
+      "expected_unsupported": ["comment", "text_box", "ole_object"]
     }
   ]
 }

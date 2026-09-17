@@ -6,19 +6,17 @@ AI Office 文档审计是“智能体开发实战”课程中的 Word 文档审�
 
 项目可以直接当 Python CLI 使用，也可以接入 Codex、Nanobot 和 Claude Code。三个入口共用同一套审计代码，避免不同智能体跑出不同规则。
 
-截至 2026-09-11，当前分支为 `main`，已配置 GitHub `origin` <https://github.com/STAR-LAB-AI-Agent/office-audit.git>，仓库根目录已提供 MIT `LICENSE`。测试、宿主兼容、公开候选和发布边界汇总在 [`docs/validation-status.md`](docs/validation-status.md)，其他报告保留实验过程和分析；最终公开交付尚未完成。
-
 ## 能检查什么
 
 目前有三种模式：
 
 - `full`：结构、字段和基础格式一起检查；
-- `structure`：检查标题层级、章节顺序和用户指定的必需章节；
+- `structure`：检查标题层级和用户指定的必需章节；
 - `fields_format`：检查空段落、空单元格、常见占位符和格式离群。
 
 必需章节由用户提供，程序不会默认所有文档都要有“摘要、正文、参考文献”之类的固定结构。没有章节清单时，报告会注明“未指定标准”，然后继续完成其他检查。
 
-正文、表格、嵌套表格以及实际使用的页眉页脚会参与审计。图片、文本框、形状、OLE、SmartArt、批注和修订目前还不能直接解析，但程序会逐个记录它们的位置、数量和可能漏检的内容，不会用一句“存在未审计对象”带过。
+正文、表格、嵌套表格以及实际使用的页眉页脚会参与审计。图片、公式、文本框、形状、OLE、SmartArt、批注和修订中的内容目前不能直接审计，程序会逐项记录这些对象的位置、数量和可能漏检的内容。
 
 ## 快速开始
 
@@ -106,13 +104,13 @@ JSON 是主输出格式，另外提供 Markdown 和终端摘要。每条问题�
 
 ## 测试
 
-Codex、Nanobot 和 Claude Code 已有端到端验收记录；Antigravity 尚未验证。证据边界见 [`docs/validation-status.md`](docs/validation-status.md) 和 [`docs/runtime-compatibility.md`](docs/runtime-compatibility.md)。单元测试不需要网络或模型密钥：
+Codex、Nanobot 和 Claude Code 有 9 月 11 日的端到端记录，后续规则修改尚需宿主复测。Antigravity 的 CLI 测试不等于宿主自主调用验证。证据边界见 [`docs/validation-status.md`](docs/validation-status.md) 和 [`docs/runtime-compatibility.md`](docs/runtime-compatibility.md)。单元测试不需要网络或模型密钥：
 
 ```powershell
 python -m unittest discover -s tests -v
 ```
 
-2026-09-12 当前验收为 25/25 个 unittest 通过，包含原有16项测试和9项排版正反例测试；后续数量与结果以状态页为准。
+2026-09-15 在 Python 3.9 和 3.12 环境中均通过 46 项测试，覆盖审计规则、评测标签、配置校验、资源预检和只读输出保护。
 
 受控缺陷样例会在临时目录生成，不会留下测试文档：
 
@@ -120,7 +118,7 @@ python -m unittest discover -s tests -v
 python scripts/evaluate_controlled_cases.py --format terminal
 ```
 
-2026-09-11 当前验收为 5/5 组受控样例通过。该结果只覆盖合成的确定性规则样例，不替代公开候选的 PII 和再分发核验。性能测试可以这样运行：
+2026-09-15 通过 15 组受控样例。该结果只覆盖预设的合成规则样例，不代表真实文档准确率，也不替代 PII 和再分发核验。性能测试可以这样运行：
 
 ```powershell
 python scripts/benchmark_audit.py --sizes 50,200,800 --repeats 3
@@ -162,7 +160,7 @@ python scripts/demo_audit.py --output-dir outputs/demo --force
 - [`docs/performance-baseline.md`](docs/performance-baseline.md)：性能基线；
 - [`docs/demo-script.md`](docs/demo-script.md)：演示录制步骤；
 - [`docs/experiment-report.md`](docs/experiment-report.md)：阶段实验记录；
-- [`docs/ai-safety-case-report.md`](docs/ai-safety-case-report.md)：安全边界说明。
+- [`docs/ai-safety-case-report.md`](docs/ai-safety-case-report.md)：香港深度伪造视频会议诈骗案例分析。
 
 ## License
 

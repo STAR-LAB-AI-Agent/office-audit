@@ -50,7 +50,7 @@ class Phase1RulesTests(unittest.TestCase):
         doc.add_paragraph('对象下文')
         result = self.audit(doc)
         self.assertEqual(self.findings(result, 'fields.empty_paragraph'), [])
-        self.assertEqual(len(result['unsupported_objects']), 1)
+        self.assertEqual({o['object_type'] for o in result['unsupported_objects']}, {'image_or_drawing', 'equation'})
         self.assertIn('对象上文', render_result(result, 'markdown'))
 
     def test_title_candidate_is_not_a_verified_required_section(self):
