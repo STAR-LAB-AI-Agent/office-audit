@@ -55,7 +55,7 @@ python scripts/audit_docx.py --input outputs/demo/demo-input.docx --mode full --
 
 9月15日在Python 3.9.0和3.12.14分别完成46项单元测试，均通过；15组受控评测全部通过。文档—规则级指标为TP=8、FP=0、FN=0、TN=27，精确率和召回率均为100%。指标仅适用于预先定义的合成样例，不能用作真实文档准确率或安全保障承诺。
 
-12份仓库外真实文档本轮回归均无解析错误，输入哈希保持不变，已识别未审计对象仍为33个。9月11日保留了Codex、Nanobot、Claude Code宿主运行记录；之后的修改须另行复测。GitHub Actions 工作流已配置并在云端针对 Python 3.10、3.11、3.12 矩阵实际执行全部通过（Run ID: 35195627461）。
+12份仓库外真实文档本轮回归均无解析错误，输入哈希保持不变，已识别未审计对象仍为33个。9月11日保留了Codex、Nanobot、Claude Code宿主运行记录；之后的修改须另行复测。GitHub Actions 工作流已配置并在云端针对 Python 3.10、3.11、3.12 矩阵实际执行全部通过（见最新 main 分支 [Actions 状态](https://github.com/STAR-LAB-AI-Agent/office-audit/actions/workflows/audit-ci.yml?query=branch%3Amain)）。
 
 ```powershell
 python -m unittest discover -s tests -v

@@ -10,7 +10,7 @@
 
 ## 二 环境与样例
 
-9月15日在本机分别使用 Python 3.9.0 与随工作区提供的 Python 3.12.14 运行单元测试，依赖为 python-docx 1.2.0。GitHub Actions 已配置 Python 3.10、3.11、3.12 矩阵，并在云端针对当前代码实际执行全部通过（Run ID: 35195627461）。
+9月15日在本机分别使用 Python 3.9.0 与随工作区提供的 Python 3.12.14 运行单元测试，依赖为 python-docx 1.2.0。GitHub Actions 已配置 Python 3.10、3.11、3.12 矩阵，最新 main 分支自动化工作流实际执行全部通过（参见 [GitHub Actions 动态状态](https://github.com/STAR-LAB-AI-Agent/office-audit/actions/workflows/audit-ci.yml?query=branch%3Amain)）。
 
 测试数据分为15组合成样例与12份仓库外真实文档。合成样例在临时目录生成，运行结束后清理；真实文档用于检查解析退化和报告可用性，不随代码公开。数据集元数据许可不代表每份文件都有再分发许可。评测脚本不发起网络请求，但没有提供阻断网络的操作系统沙箱。
 

@@ -1,6 +1,6 @@
 # 智能体宿主兼容说明
 
-> 状态日期：2026-09-15。本文记录统一内核在不同智能体（Agent）宿主环境中的接入方式、验收口径与实测记录。
+> 状态日期：2026-09-17。本文记录统一内核在不同智能体（Agent）宿主环境中的接入方式、验收口径与实测记录。
 
 ## 统一设计与架构优势
 
@@ -10,12 +10,16 @@
 
 ## 接入方式与验收口径
 
+统一证据等级：**A=当前验证**、**B=历史验证**、**C=未验证**。
+
 | 宿主 | 接入方式 | 验收状态 | 证据级别 |
 | --- | --- | --- | --- |
-| **Codex** | 将仓库根目录安装或链接到 Codex Skills 目录，名称保持 `office-audit` | 2026-09-11 使用 Codex CLI 0.153.4 实测通过 | C（端到端历史实测） |
-| **Nanobot** | 将本仓库作为 workspace；Nanobot 自动扫描 `skills/office-audit/SKILL.md` | 2026-09-11 课程统一环境实测通过 | C（端到端历史实测） |
-| **Claude Code** | 直接打开本仓库；项目入口位于 `.claude/skills/office-audit/SKILL.md` | 2026-09-11 实测通过 | C（端到端历史实测） |
-| **Antigravity** | 在 Antigravity 工作区中直接调用底层 CLI 工具或集成调用 | 2026-09-14 开发记录包含 CLI 测试，未确认 Skill 自主发现与调用 | 开发环境记录，非宿主验收 |
+| **Codex** | 将仓库根目录安装或链接到 Codex Skills 目录，名称保持 `office-audit` | 2026-09-11 使用 Codex CLI 0.153.4 实测通过 | B（历史验证） |
+| **Nanobot** | 将本仓库作为 workspace；Nanobot 自动扫描 `skills/office-audit/SKILL.md` | 2026-09-11 课程统一环境实测通过 | B（历史验证） |
+| **Claude Code** | 直接打开本仓库；项目入口位于 `.claude/skills/office-audit/SKILL.md` | 2026-09-11 实测通过 | B（历史验证） |
+| **Antigravity (CLI)** | 在 Antigravity 工作区中直接调用底层 CLI 脚本执行全流程审计 | 2026-09-17 实测通过，哈希一致，防覆写有效（详见 [docs/antigravity-verification.md](antigravity-verification.md)） | A（当前验证） |
+| **Antigravity (Agent)** | 通过 Antigravity 原生 Agent Tool / Skill 机制由 LLM 自主触发与调度 | 尚未开展端到端 Agent 自主闭环验证 | C（未验证） |
+
 
 “脚本测试通过”“Skill 结构可发现”和“宿主真实调用通过”是三项不同证据。某个宿主只有在它确实识别 Skill、调用审计器、生成报告并保持原文不变后，才可标为实测通过。
 
@@ -57,7 +61,7 @@
 
 ## Antigravity 开发环境中的 CLI 记录（2026-09-17 最新实测）
 
-在 Antigravity 研发环境中，审计器作为原生 Python CLI 驱动执行，于 2026-09-17 完成了交付前最终全量复测（记录于 `outputs/antigravity-final/verification.md`）：
+在 Antigravity 研发环境中，审计器作为原生 Python CLI 驱动执行，于 2026-09-17 完成了交付前最终全量复测。仓库内已沉淀公开、脱敏的验证凭据：[`docs/antigravity-verification.md`](antigravity-verification.md)；本地全量测试产物保存在被 Git 忽略的 `outputs/antigravity-final/verification.md`（该路径受 `.gitignore` 保护，不提交至 GitHub）：
 - 全量 46 项单元测试 `python -m unittest discover -s tests -v` 耗时约 6.6 秒全部通过；
 - 15 组受控缺陷样例评测 `scripts/evaluate_controlled_cases.py` 自动化生成、校验与指标计算顺利完成；
 - 12 份真实外部文档基线对比保持 SHA-256 100% 不变，准确抓取 33 处未审计对象；
@@ -65,5 +69,6 @@
 
 ## 结论
 
-Codex、Nanobot、Claude Code 拥有 2026-09-11 的端到端宿主调用历史记录，当前 46 测试新版本建议在对应环境中参考复测提纲再次跑通。上述 Antigravity 记录仅证明在当前开发与运行环境中通过 CLI 成功执行审计、测试与安全拦截，不能证明通过 Antigravity 原生 Skill 发现机制由大模型自主调度调用，因此不将其列为已完成全链路自主验收的宿主。
+Codex、Nanobot、Claude Code 拥有 2026-09-11 的端到端宿主调用历史记录（证据等级 B），当前 46 测试新版本建议在对应环境中参考复测提纲再次跑通。上述 Antigravity 记录仅证明在当前开发与运行环境中通过 CLI 成功执行审计、测试与安全拦截（证据等级 A，详见 [`docs/antigravity-verification.md`](antigravity-verification.md)），不能证明通过 Antigravity 原生 Skill 发现机制由大模型自主调度调用（证据等级 C），因此不将其列为已完成全链路自主验收的宿主。
+
 

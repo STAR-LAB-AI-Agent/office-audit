@@ -1,6 +1,9 @@
 # AI Office 文档审计
 
+[![Audit CI](https://github.com/STAR-LAB-AI-Agent/office-audit/actions/workflows/audit-ci.yml/badge.svg?branch=main)](https://github.com/STAR-LAB-AI-Agent/office-audit/actions/workflows/audit-ci.yml?query=branch%3Amain)
+
 AI Office 文档审计是“智能体开发实战”课程中的 Word 文档审计 Skill，对应选题 `#03 AI Office 文档审计`。
+
 
 该项目用于在 Word 文档提交前检查标题层级、漏填内容、占位符和明显的格式异常，并逐项列出目前无法直接审计的对象。当前版本专注 `.docx`，审计过程只读，不会修改原文。
 

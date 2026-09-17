@@ -21,8 +21,9 @@
 | **受控缺陷样例评测**（15 组预设缺陷合成样本指标评估） | 已完成 | `python scripts/evaluate_controlled_cases.py`（TP=8, FP=0, FN=0, TN=27，Precision=100%, Recall=100%） | 否 |
 | **真实样例回归测试**（12 份真实样式样本无解析错误、原文哈希不变） | 已完成 | `python scripts/compare_rule_baseline.py` 全部 sample 输入 SHA-256 保持一致，识别 33 处未审计对象 | 否 |
 | **性能基线测试**（50 / 200 / 800 段落合成文档压力测试） | 已完成 | `python scripts/benchmark_audit.py` 实测完成（p50 分别为 181.2ms, 675.0ms, 5988.5ms） | 否 |
-| **云端自动化 CI 工作流**（GitHub Actions 矩阵测试） | 已完成 | CI Run ID: 35195627461，Python 3.10、3.11、3.12 矩阵全绿通过 | 否 |
-| **Antigravity 环境 CLI 冒烟测试** | 已完成 | `outputs/antigravity-final/verification.md` 实际运行并记录哈希与三模式调用数据 | 否 |
+| **云端自动化 CI 工作流**（GitHub Actions 矩阵测试） | 已完成 | 最新 main 分支 [GitHub Actions 工作流](https://github.com/STAR-LAB-AI-Agent/office-audit/actions/workflows/audit-ci.yml?query=branch%3Amain) 矩阵构建（Python 3.10、3.11、3.12）全绿通过 | 否 |
+| **Antigravity 环境 CLI 冒烟测试** | 已完成 | 见 [`docs/antigravity-verification.md`](antigravity-verification.md)（本地原始数据见 `outputs/antigravity-final/`，受 gitignore 保护） | 否 |
+
 | **Codex 宿主端到端 Skill 调用** | 已完成但为历史证据 | 2026-09-11 历史冒烟测试记录（当前 46 测试版未独立复测） | 否（建议按提纲复测） |
 | **Nanobot 宿主端到端 Skill 调用** | 已完成但为历史证据 | 2026-09-11 历史冒烟测试记录（当前 46 测试版未独立复测） | 否（建议按提纲复测） |
 | **Claude Code 宿主端到端 Skill 调用** | 已完成但为历史证据 | 2026-09-11 历史冒烟测试记录（当前 46 测试版未独立复测） | 否（建议按提纲复测） |

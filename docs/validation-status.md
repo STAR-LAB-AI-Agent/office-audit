@@ -18,8 +18,9 @@
 | **受控样例评测** | Level A | 15 组全部通过（TP=8, FP=0, FN=0, TN=27） | Precision=100.0%, Recall=100.0%。声明：仅代表预设规则集，不代表真实文档实际准确率。 |
 | **真实文档回归** | Level A | 12 份样本解析无报错，输入哈希完全不变 | 捕获 33 处未审计对象。声明：缺乏人工逐点真值标签，不能断言未审计对象召回率 100%。 |
 | **性能压力基线** | Level A | 50/200/800 段落测试实测完成 | 实测 p50 分别为 181.21ms, 674.98ms, 5988.48ms；离线内核 `model_calls=0`。 |
-| **云端 CI 工作流** | Level A | Python 3.10 / 3.11 / 3.12 矩阵全绿通过 | GitHub Actions Run ID: `35195627461`，对应最新提交推送到 `main` 分支。 |
-| **Antigravity CLI** | Level A | 端到端 CLI 冒烟、输入哈希保护及防覆写测试通过 | 输出记录于 `outputs/antigravity-final/verification.md`；不代表原生 Agent Tool 自主闭环验证。 |
+| **云端 CI 工作流** | Level A | Python 3.10 / 3.11 / 3.12 矩阵全绿通过 | [![Audit CI](https://github.com/STAR-LAB-AI-Agent/office-audit/actions/workflows/audit-ci.yml/badge.svg?branch=main)](https://github.com/STAR-LAB-AI-Agent/office-audit/actions/workflows/audit-ci.yml?query=branch%3Amain) 最新 main 分支云端矩阵构建全绿通过。 |
+| **Antigravity CLI** | Level A | 端到端 CLI 冒烟、输入哈希保护及防覆写测试通过 | 公开凭据见 [`docs/antigravity-verification.md`](antigravity-verification.md)；本地生成物见 `outputs/antigravity-final/`（受 gitignore 保护不公开）；不代表原生 Agent Tool 自主闭环验证。 |
+
 | **Codex 宿主** | Level B | 具备 2026-09-11 端到端调用记录 | 历史 3 模式调用通过，当前 46 测试新版尚未重新独立跑通宿主交互。 |
 | **Nanobot 宿主** | Level B | 具备 2026-09-11 端到端调用记录 | 历史 3 模式调用通过，当前 46 测试新版尚未重新独立跑通宿主交互。 |
 | **Claude Code 宿主**| Level B | 具备 2026-09-11 端到端调用记录 | 历史 3 模式调用通过，当前 46 测试新版尚未重新独立跑通宿主交互。 |
