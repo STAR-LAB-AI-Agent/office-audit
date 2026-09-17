@@ -55,14 +55,15 @@
 
 两份真实报告测试副本与仓库外原文件的 SHA-256 一致。运行产物分别保存在被 Git 忽略的 `outputs/nanobot-test/` 和 `outputs/claude-test/`，原始个人文档保存在被 Git 忽略的 `data/external/personal-reports/`，均不进入公开仓库。
 
-## Antigravity 开发环境中的CLI记录（2026-09-14）
+## Antigravity 开发环境中的 CLI 记录（2026-09-17 最新实测）
 
-在 Antigravity 研发环境中，审计器作为原生 Python CLI 驱动执行，完成了以下关键验证：
-- 全量 38 项单元测试 `python -m unittest discover -s tests -v` 耗时约 3.8 秒，全部通过；
+在 Antigravity 研发环境中，审计器作为原生 Python CLI 驱动执行，于 2026-09-17 完成了交付前最终全量复测（记录于 `outputs/antigravity-final/verification.md`）：
+- 全量 46 项单元测试 `python -m unittest discover -s tests -v` 耗时约 6.6 秒全部通过；
 - 15 组受控缺陷样例评测 `scripts/evaluate_controlled_cases.py` 自动化生成、校验与指标计算顺利完成；
-- 12 份真实外部文档基线对比保持 SHA-256 100% 不变；
-- 防护边界有效阻断畸形文件与超限输入。
+- 12 份真实外部文档基线对比保持 SHA-256 100% 不变，准确抓取 33 处未审计对象；
+- 在 `outputs/antigravity-final/demo/demo-input.docx` 上实跑三模式审计，输入 SHA-256（`f23eb710...`）前后一致，输出路径冲突被安全拦截（退出码 1，`unsafe_output_path`）。
 
 ## 结论
 
-Codex、Nanobot、Claude Code有9月11日的宿主记录，之后代码修改仍需复测。上述Antigravity记录仅说明开发环境执行过CLI及测试，不能证明Skill发现与自主调用，不将其列为已验收的第四种宿主。
+Codex、Nanobot、Claude Code 拥有 2026-09-11 的端到端宿主调用历史记录，当前 46 测试新版本建议在对应环境中参考复测提纲再次跑通。上述 Antigravity 记录仅证明在当前开发与运行环境中通过 CLI 成功执行审计、测试与安全拦截，不能证明通过 Antigravity 原生 Skill 发现机制由大模型自主调度调用，因此不将其列为已完成全链路自主验收的宿主。
+
